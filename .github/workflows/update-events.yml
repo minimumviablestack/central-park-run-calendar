@@ -1,0 +1,25 @@
+name: Update Events and Deploy
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Run daily at midnight
+  workflow_dispatch:      # Allow manual trigger
+
+jobs:
+  update-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Crawl events
+        run: npm run crawl
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
