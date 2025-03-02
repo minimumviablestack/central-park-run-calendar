@@ -14,8 +14,8 @@ const openai = new OpenAI({
 
 // URLs to crawl - replace with your target websites
 const urlsToScrape = [
-  'https://www.centralparknyc.org/events',
-  'https://www.nycgovparks.org/events/central-park'
+  'https://www.nycgovparks.org/parks/central-park/events',
+  'https://www.nyrr.org/fullraceyearindex'
   // Add more URLs as needed
 ];
 
@@ -43,7 +43,11 @@ const csvWriter = createCsvWriter({
 
 async function fetchPageContent(url) {
   try {
-    const response = await axios.get(url);
+    const response = await axios.get(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36'
+      }
+    });
     return response.data;
   } catch (error) {
     console.error(`Error fetching ${url}:`, error.message);
@@ -111,7 +115,7 @@ async function main() {
     const htmlContent = await fetchPageContent(url);
     
     if (htmlContent) {
-      console.log(`Extracting events from ${url}...`);
+      console.log(`Extracting events from ${htmlContent}...`);
       const events = await extractEventsWithLLM(htmlContent, url);
       console.log(`Found ${events.length} events from ${url}`);
       allEvents = [...allEvents, ...events];
