@@ -100,50 +100,69 @@ function EventList() {
 
       <Grid container spacing={2}>
         {/* Today's events section */}
-        {todayEvents.length > 0 && (
-          <>
-            <Grid item xs={12}>
-              <Typography variant="h6" color="info.main" sx={{ mt: 2, fontWeight: 'bold' }}>
-                Today's Events
-              </Typography>
-            </Grid>
-            
-            {todayEvents.map((event, index) => (
-              <Grid item xs={12} key={`today-${index}`}>
-                <Card 
-                  elevation={3}
-                  sx={{
-                    borderLeft: 4,
-                    borderColor: 'info.main',
-                    backgroundColor: 'info.light',
-                    opacity: 0.9
-                  }}
-                >
-                  <CardContent>
-                    <Typography variant="h6" color="info.dark" fontWeight="bold">
-                      {event.event_name}
+        <Grid item xs={12}>
+          <Typography variant="h6" color="info.main" sx={{ mt: 2, fontWeight: 'bold' }}>
+            Today's Status
+          </Typography>
+        </Grid>
+
+        <Grid item xs={12}>
+          {todayEvents.length > 0 ? (
+            todayEvents.map((event, index) => (
+              <Card 
+                elevation={3}
+                sx={{
+                  borderLeft: 4,
+                  borderColor: 'info.main',
+                  backgroundColor: 'info.light',
+                  opacity: 0.9
+                }}
+                key={`today-${index}`}
+              >
+                <CardContent>
+                  <Typography variant="h6" color="info.dark" fontWeight="bold">
+                    {event.event_name}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" fontWeight="bold">
+                    Today | {event.time_range}
+                  </Typography>
+                  <Box sx={{ mt: 1 }}>
+                    <Typography 
+                      component="a" 
+                      href={event.event_url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      color="primary"
+                      sx={{ textDecoration: 'none' }}
+                    >
+                      Event Details →
                     </Typography>
-                    <Typography variant="body2" color="text.secondary" fontWeight="bold">
-                      Today | {event.time_range}
-                    </Typography>
-                    <Box sx={{ mt: 1 }}>
-                      <Typography 
-                        component="a" 
-                        href={event.event_url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        color="primary"
-                        sx={{ textDecoration: 'none' }}
-                      >
-                        Event Details →
-                      </Typography>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </>
-        )}
+                  </Box>
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            <Card 
+              elevation={3}
+              sx={{
+                borderLeft: 4,
+                borderColor: 'success.main',
+                backgroundColor: 'success.light',
+                textAlign: 'center',
+                py: 4
+              }}
+            >
+              <CardContent>
+                <Typography variant="h1" color="success.dark" fontWeight="bold">
+                  YES!
+                </Typography>
+                <Typography variant="h6" color="success.dark">
+                  Great day for a run in the park
+                </Typography>
+              </CardContent>
+            </Card>
+          )}
+        </Grid>
 
         {/* Upcoming events section */}
         {futureEvents.length > 0 && (

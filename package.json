@@ -2,9 +2,8 @@
   "name": "park-run-calendar",
   "version": "1.0.0",
   "description": "A simple web application that shows park events to help runners plan their routes and avoid event crowds.",
-  "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "react-scripts start",
     "crawl": "node scripts/crawlEvents.js",
     "build": "npm run crawl && cp -r index.html styles.css data dist/",
     "deploy": "gh-pages -d dist"
@@ -15,9 +14,43 @@
     "csv-parser": "^3.0.0",
     "csv-writer": "^1.6.0",
     "dotenv": "^16.3.1",
-    "openai": "^4.14.0"
+    "openai": "^4.14.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/icons-material": "^6.4.6",
+    "@mui/material": "^6.4.6",
+    "@mui/x-date-pickers": "^7.27.1",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.2.0",
+    "@testing-library/user-event": "^13.5.0",
+    "csv-parse": "^5.6.0",
+    "dayjs": "^1.11.13",
+    "papaparse": "^5.5.2",
+    "react-scripts": "5.0.1",
+    "web-vitals": "^2.1.4"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
   },
   "devDependencies": {
     "gh-pages": "^6.0.0"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }
