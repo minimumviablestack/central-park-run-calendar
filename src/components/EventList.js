@@ -35,8 +35,12 @@ function EventList() {
         Papa.parse(csvText, {
           header: true,
           complete: (results) => {
-            // Sort events by date
-            const sortedEvents = results.data.sort((a, b) => 
+            // Filter out empty rows and sort events by date
+            const filteredData = results.data.filter(row => 
+              row.DATE && row.EVENT_NAME && Object.keys(row).length > 0
+            );
+            
+            const sortedEvents = filteredData.sort((a, b) => 
               new Date(a.DATE) - new Date(b.DATE)
             );
             setEvents(sortedEvents);
