@@ -29,12 +29,13 @@ jobs:
           
       - name: Copy data to public folder
         run: |
-          mkdir -p public/data
-          cp data/events.csv public/data/
+          mkdir -p build/data
+          cp data/events.csv build/data/
           
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: dist
+          folder: build
           branch: gh-pages
           cname: centralpark.run
+          token: ${{ secrets.GITHUB_TOKEN }}

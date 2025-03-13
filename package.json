@@ -5,8 +5,8 @@
   "scripts": {
     "start": "react-scripts start",
     "crawl": "node scripts/crawlEvents.js",
-    "build": "mkdir -p dist && cp -r public/* data dist/",
-    "deploy": "gh-pages -d dist"
+    "build": "react-scripts build && cp -r data build/",
+    "deploy": "gh-pages -d build"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
