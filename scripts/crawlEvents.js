@@ -16,7 +16,8 @@ const openai = new OpenAI({
 // URLs to crawl - replace with your target websites
 const urlsToScrape = [
   'https://www.nycgovparks.org/parks/central-park/events',
-  'https://www.nyrr.org/fullraceyearindex'
+  'https://www.nyrr.org/fullraceyearindex',
+  'https://nycruns.com/races'
   // Add more URLs as needed
 ];
 
@@ -92,7 +93,11 @@ async function extractEventsWithLLM(htmlContent, sourceUrl) {
         },
         {
           role: "user",
-          content: `Extract all running events and races from this text from ${sourceUrl}. Focus on event name, date, time, and location. Return ONLY a JSON array with objects containing these fields: name, date (YYYY-MM-DD format), startTime, endTime, location, description, category (if available), eventUrl (direct link to the event if available). For NYRR races, look for race calendar entries, upcoming events, and scheduled runs. For NYC Parks events, include the category field. Here's the text: ${textContent}`
+          content: `Extract all running events and races from this text from ${sourceUrl}. Focus on event name, date, time, and location. Return ONLY a JSON array with objects containing these fields: name, date (YYYY-MM-DD format), startTime, endTime, location, description, category (if available), eventUrl (direct link to the event if available). 
+          For NYRR races, look for race calendar entries, upcoming events, and scheduled runs. 
+          For NYC Parks events, include the category field. 
+          For NYCRUNS races, use RACE START time as event start ime.
+          Here's the text: ${textContent}`
         }
       ],
       temperature: 0.2,
