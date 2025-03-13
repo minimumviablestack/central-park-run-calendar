@@ -184,6 +184,13 @@ async function main() {
   // Write to CSV
   if (uniqueEvents.length > 0) {
     await csvWriter.writeRecords(uniqueEvents);
+    
+    // Remove trailing newline if it exists
+    const fileContent = fs.readFileSync(outputPath, 'utf8');
+    if (fileContent.endsWith('\n')) {
+      fs.writeFileSync(outputPath, fileContent.trimEnd());
+    }
+    
     console.log(`Successfully wrote ${uniqueEvents.length} events to ${outputPath}`);
   } else {
     console.log("No events found to write to CSV");
