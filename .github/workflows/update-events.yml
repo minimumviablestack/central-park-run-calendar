@@ -37,3 +37,4 @@ jobs:
         with:
           folder: dist
           branch: gh-pages
+          cname: centralpark.run
