@@ -5,7 +5,7 @@
   "scripts": {
     "start": "react-scripts start",
     "crawl": "node scripts/crawlEvents.js",
-    "build": "npm run crawl && cp -r index.html styles.css data dist/",
+    "build": "mkdir -p dist && cp -r public/* data dist/",
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
