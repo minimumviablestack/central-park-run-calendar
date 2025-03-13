@@ -27,7 +27,7 @@ function EventList() {
     const fetchEvents = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/data/2025/events.csv');
+        const response = await fetch('/data/events.csv'); // Updated path
         if (!response.ok) {
           throw new Error('Failed to fetch events data');
         }
@@ -37,7 +37,7 @@ function EventList() {
           complete: (results) => {
             // Sort events by date
             const sortedEvents = results.data.sort((a, b) => 
-              new Date(a.date) - new Date(b.date)
+              new Date(a.DATE) - new Date(b.DATE)
             );
             setEvents(sortedEvents);
             setLoading(false);
@@ -76,17 +76,17 @@ function EventList() {
   
   // Filter to only show current and future events
   const upcomingEvents = events.filter(event => 
-    dayjs(event.date).isSameOrAfter(today, 'day')
+    dayjs(event.DATE).isSameOrAfter(today, 'day')
   );
   
   // Separate today's events
   const todayEvents = upcomingEvents.filter(event => 
-    dayjs(event.date).isSame(today, 'day')
+    dayjs(event.DATE).isSame(today, 'day')
   );
   
   // Future events (not today)
   const futureEvents = upcomingEvents.filter(event => 
-    !dayjs(event.date).isSame(today, 'day')
+    !dayjs(event.DATE).isSame(today, 'day')
   );
 
   return (
@@ -121,15 +121,25 @@ function EventList() {
               >
                 <CardContent>
                   <Typography variant="h6" color="info.dark" fontWeight="bold">
-                    {event.event_name}
+                    {event.EVENT_NAME}
                   </Typography>
                   <Typography variant="body2" color="text.secondary" fontWeight="bold">
-                    Today | {event.time_range}
+                    Today | {event.START_TIME}{event.END_TIME ? `-${event.END_TIME}` : ''}
                   </Typography>
+                  {event.LOCATION && (
+                    <Typography variant="body2" color="text.secondary">
+                      Location: {event.LOCATION}
+                    </Typography>
+                  )}
+                  {event.DESCRIPTION && (
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                      {event.DESCRIPTION.substring(0, 100)}{event.DESCRIPTION.length > 100 ? '...' : ''}
+                    </Typography>
+                  )}
                   <Box sx={{ mt: 1 }}>
                     <Typography 
                       component="a" 
-                      href={event.event_url} 
+                      href={event.URL} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       color="primary"
@@ -174,7 +184,7 @@ function EventList() {
             </Grid>
             
             {futureEvents.map((event, index) => {
-              const eventDate = dayjs(event.date);
+              const eventDate = dayjs(event.DATE);
               const isThisWeek = eventDate.diff(today, 'day') < 7;
               
               return (
@@ -189,15 +199,25 @@ function EventList() {
                   >
                     <CardContent>
                       <Typography variant="h6" color="primary">
-                        {event.event_name}
+                        {event.EVENT_NAME}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        {eventDate.format('dddd, MMMM D, YYYY')} | {event.time_range}
+                        {eventDate.format('dddd, MMMM D, YYYY')} | {event.START_TIME}{event.END_TIME ? `-${event.END_TIME}` : ''}
                       </Typography>
+                      {event.LOCATION && (
+                        <Typography variant="body2" color="text.secondary">
+                          Location: {event.LOCATION}
+                        </Typography>
+                      )}
+                      {event.DESCRIPTION && (
+                        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                          {event.DESCRIPTION.substring(0, 100)}{event.DESCRIPTION.length > 100 ? '...' : ''}
+                        </Typography>
+                      )}
                       <Box sx={{ mt: 1 }}>
                         <Typography 
                           component="a" 
-                          href={event.event_url} 
+                          href={event.URL} 
                           target="_blank" 
                           rel="noopener noreferrer"
                           color="primary"

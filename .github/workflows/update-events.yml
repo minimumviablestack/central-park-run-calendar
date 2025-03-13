@@ -1,7 +1,7 @@
 name: Update Events and Deploy
 
 on:
-  #schedule:
+  schedule:
   #  - cron: '0 0 * * *'  # Run daily at midnight
   workflow_dispatch:      # Allow manual trigger
 
@@ -23,3 +23,17 @@ jobs:
         run: npm run crawl
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+      - name: Build site
+        run: npm run build
+          
+      - name: Copy data to public folder
+        run: |
+          mkdir -p public/data
+          cp data/events.csv public/data/
+          
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: build
+          branch: gh-pages
