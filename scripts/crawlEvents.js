@@ -92,7 +92,7 @@ async function extractEventsWithLLM(htmlContent, sourceUrl) {
         },
         {
           role: "user",
-          content: `Extract all running events and races from this text from ${sourceUrl}. Focus on event name, date, time, and location. Return ONLY a JSON array with objects containing these fields: name, date (YYYY-MM-DD format), startTime, endTime, location, description, category (if available). For NYRR races, look for race calendar entries, upcoming events, and scheduled runs. For NYC Parks events, include the category field. Here's the text: ${textContent}`
+          content: `Extract all running events and races from this text from ${sourceUrl}. Focus on event name, date, time, and location. Return ONLY a JSON array with objects containing these fields: name, date (YYYY-MM-DD format), startTime, endTime, location, description, category (if available), eventUrl (direct link to the event if available). For NYRR races, look for race calendar entries, upcoming events, and scheduled runs. For NYC Parks events, include the category field. Here's the text: ${textContent}`
         }
       ],
       temperature: 0.2,
@@ -105,8 +105,11 @@ async function extractEventsWithLLM(htmlContent, sourceUrl) {
       const jsonMatch = responseText.match(/\[[\s\S]*\]/);
       if (jsonMatch) {
         const events = JSON.parse(jsonMatch[0]);
-        // Add source URL to each event
-        return events.map(event => ({...event, url: sourceUrl}));
+        // Add source URL to each event if no specific event URL is provided
+        return events.map(event => ({
+          ...event, 
+          url: event.eventUrl || sourceUrl
+        }));
       } else {
         console.error("No JSON found in response");
         return [];
