@@ -1,19 +1,18 @@
 # Park Run Calendar
 
-A simple web application that shows park events to help runners plan their routes and avoid event crowds.
+A webapp to check for events in the Central Park to avoid running into a race you are not participating...
 
 ## Features
 
 - View today's park events with special highlighting
 - See upcoming events for the week
 - Mobile-friendly interface with a clean, calendar-like design
-- Data stored in simple CSV format for easy updates
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js (v14 or later)
+- Node.js (v22 or later)
 - npm
 
 ### Installation
