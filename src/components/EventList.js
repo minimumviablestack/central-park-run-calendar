@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { 
   Box,
   Card,
@@ -106,7 +107,7 @@ function EventList() {
         {/* Today's events section */}
         <Grid item xs={12}>
           <Typography variant="h6" color="info.main" sx={{ mt: 2, fontWeight: 'bold' }}>
-            Today's Status
+            Today in Central Park
           </Typography>
         </Grid>
 
@@ -176,6 +177,40 @@ function EventList() {
               </CardContent>
             </Card>
           )}
+        </Grid>
+
+        {/* Added helpful links section */}
+        <Grid item xs={12}>
+          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 3, mt: 2, mb: 1 }}>
+            <Typography 
+              component="a" 
+              href="https://dressmyrun.com/place/40.80000,-73.97630" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              color="primary"
+              sx={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}
+            >
+              Weather & What to wear
+            </Typography>
+            <Typography 
+              component="a" 
+              href="https://github.com/minimumviablestack/central-park-run-calendar" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              color="primary"
+              sx={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}
+            >
+              GitHub
+            </Typography>
+            <Typography 
+              component={Link} 
+              to="/about"
+              color="primary"
+              sx={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}
+            >
+              About
+            </Typography>
+          </Box>
         </Grid>
 
         {/* Upcoming events section */}
