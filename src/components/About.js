@@ -30,7 +30,7 @@ function About() {
       </Button>
 
       <Typography variant="body1" paragraph>
-      What is more frustrating than when you are finally well prepared for your weekend long run(or that 5k ultra) just to find out the park is occupied by another event.
+      Nothing more frustrating than when you are finally well prepared for your weekend long run(or that 5k ultra) just to find out the park is occupied by another event.
       </Typography>
 
       <Typography variant="body1" paragraph>

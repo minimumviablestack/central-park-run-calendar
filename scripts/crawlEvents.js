@@ -43,6 +43,60 @@ const csvWriter = createCsvWriter({
   ]
 });
 
+// Function to read existing events from CSV
+async function readExistingEvents() {
+  return new Promise((resolve, reject) => {
+    const events = [];
+    
+    // Check if the file exists
+    if (!fs.existsSync(outputPath)) {
+      return resolve([]);
+    }
+    
+    fs.createReadStream(outputPath)
+      .pipe(csv())
+      .on('data', (data) => {
+        // Convert CSV column names to our event object property names
+        const event = {
+          name: data.EVENT_NAME,
+          date: data.DATE,
+          startTime: data.START_TIME,
+          endTime: data.END_TIME,
+          location: data.LOCATION,
+          description: data.DESCRIPTION,
+          url: data.URL
+        };
+        events.push(event);
+      })
+      .on('end', () => {
+        console.log(`Loaded ${events.length} existing events from CSV`);
+        resolve(events);
+      })
+      .on('error', (error) => {
+        console.error('Error reading existing events:', error);
+        resolve([]); // Resolve with empty array on error to continue the process
+      });
+  });
+}
+
+// Function to deduplicate events
+function deduplicateEvents(events) {
+  const uniqueEvents = new Map();
+  
+  events.forEach(event => {
+    // Create a unique key using event name and date
+    const key = `${event.name.toLowerCase().trim()}_${event.date}`;
+    
+    // Only add if this key doesn't exist yet, or replace if the existing event has less information
+    if (!uniqueEvents.has(key) || 
+        (uniqueEvents.get(key).description || '').length < (event.description || '').length) {
+      uniqueEvents.set(key, event);
+    }
+  });
+  
+  return Array.from(uniqueEvents.values());
+}
+
 async function fetchPageContent(url) {
   try {
     // For NYRR website, use Puppeteer
@@ -146,25 +200,11 @@ function filterEvents(events, sourceUrl) {
   });
 }
 
-// Function to deduplicate events
-function deduplicateEvents(events) {
-  const uniqueEvents = new Map();
-  
-  events.forEach(event => {
-    // Create a unique key using event name and date
-    const key = `${event.name.toLowerCase().trim()}_${event.date}`;
-    
-    // Only add if this key doesn't exist yet, or replace if the existing event has less information
-    if (!uniqueEvents.has(key) || 
-        (uniqueEvents.get(key).description || '').length < (event.description || '').length) {
-      uniqueEvents.set(key, event);
-    }
-  });
-  
-  return Array.from(uniqueEvents.values());
-}
-
 async function main() {
+  // First, read existing events from the CSV file
+  const existingEvents = await readExistingEvents();
+  console.log(`Found ${existingEvents.length} existing events in the CSV file`);
+  
   let allEvents = [];
   
   // Process each URL
@@ -184,6 +224,10 @@ async function main() {
       allEvents = [...allEvents, ...filteredEvents];
     }
   }
+  
+  // Merge with existing events
+  allEvents = [...existingEvents, ...allEvents];
+  console.log(`Total events after merging: ${allEvents.length}`);
   
   // Deduplicate events
   const uniqueEvents = deduplicateEvents(allEvents);
