@@ -37,5 +37,4 @@ jobs:
         with:
           folder: build
           branch: gh-pages
-          cname: centralpark.run
           token: ${{ secrets.GITHUB_TOKEN }}
