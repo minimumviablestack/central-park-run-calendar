@@ -16,7 +16,7 @@ const openai = new OpenAI({
 // URLs to crawl - replace with your target websites
 const urlsToScrape = [
   'https://www.nycgovparks.org/parks/central-park/events',
-  'https://www.nyrr.org/fullraceyearindex',
+  'https://www.nyrr.org/run/race-calendar',
   'https://nycruns.com/races'
   // Add more URLs as needed
 ];
