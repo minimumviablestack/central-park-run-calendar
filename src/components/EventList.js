@@ -23,6 +23,7 @@ function EventList() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  // Removed cameraTimestamp state
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -60,6 +61,8 @@ function EventList() {
 
     fetchEvents();
   }, []);
+
+  // Removed useEffect for camera refresh
 
   if (loading) {
     return (
@@ -179,9 +182,9 @@ function EventList() {
           )}
         </Grid>
 
-        {/* Added helpful links section */}
+        {/* Modified helpful links section - keeping only Weather link */}
         <Grid item xs={12}>
-          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 3, mt: 2, mb: 1 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, mb: 1 }}>
             <Typography 
               component="a" 
               href="https://dressmyrun.com/place/40.80000,-73.97630" 
@@ -192,25 +195,56 @@ function EventList() {
             >
               Weather & What to wear
             </Typography>
-            <Typography 
-              component="a" 
-              href="https://github.com/minimumviablestack/central-park-run-calendar" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              color="primary"
-              sx={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}
-            >
-              GitHub
-            </Typography>
-            <Typography 
-              component={Link} 
-              to="/about"
-              color="primary"
-              sx={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}
-            >
-              About
-            </Typography>
           </Box>
+        </Grid>
+
+        {/* Add DOT Camera View */}
+        <Grid item xs={12}>
+          <Card elevation={2} sx={{ mt: 2, mb: 3 }}>
+            <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+              <Typography variant="h6" color="primary" gutterBottom sx={{ mb: 1 }}>
+                Loop Condition @ 72nd St
+              </Typography>
+              <Box sx={{ 
+                position: 'relative', 
+                width: '100%', 
+                height: 0, 
+                paddingBottom: '56.25%', 
+                overflow: 'hidden' 
+              }}>
+                <Box 
+                  component="img"
+                  src="https://webcams.nyctmc.org/api/cameras/3f04a686-f97c-4187-8968-cb09265e08ff/image"
+                  alt="Central Park @ 72nd St Post 37 - Live Camera"
+                  sx={{ 
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    border: '1px solid #eee',
+                    borderRadius: 1
+                  }}
+                  onError={(e) => {
+                    console.error('Failed to load traffic camera image');
+                  }}
+                />
+              </Box>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1, textAlign: 'right' }}>
+                Source: <Typography 
+                  component="a" 
+                  href="https://webcams.nyctmc.org/cameras-list" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  color="text.secondary"
+                  sx={{ textDecoration: 'underline' }}
+                >
+                  NYC DOT Traffic Camera
+                </Typography>
+              </Typography>
+            </CardContent>
+          </Card>
         </Grid>
 
         {/* Upcoming events section */}
@@ -281,6 +315,37 @@ function EventList() {
             </Alert>
           </Grid>
         )}
+        
+        {/* Footer links - GitHub and About moved here */}
+        <Grid item xs={12}>
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            gap: 3, 
+            mt: 4, 
+            pt: 2,
+            borderTop: '1px solid #eee'
+          }}>
+            <Typography 
+              component="a" 
+              href="https://github.com/minimumviablestack/central-park-run-calendar" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              color="text.secondary"
+              sx={{ textDecoration: 'none', fontSize: '0.875rem' }}
+            >
+              GitHub
+            </Typography>
+            <Typography 
+              component={Link} 
+              to="/about"
+              color="text.secondary"
+              sx={{ textDecoration: 'none', fontSize: '0.875rem' }}
+            >
+              About
+            </Typography>
+          </Box>
+        </Grid>
       </Grid>
     </Paper>
   );
