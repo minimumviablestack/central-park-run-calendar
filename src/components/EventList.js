@@ -220,7 +220,7 @@ function EventList() {
                     forecast.precipChance > 80 ||
                     forecast.hasThunderstorm ||
                     forecast.rainfall > 3 ||
-                    forecast.windGust > 25 ||
+                    forecast.windGust > 30 ||
                     getMinWindSpeed(weather.windSpeed) > 20
                   ) ? 'warning.main' : 'success.main'
                 })(),
@@ -231,7 +231,7 @@ function EventList() {
                     forecast.precipChance > 80 ||
                     forecast.hasThunderstorm ||
                     forecast.rainfall > 3 ||
-                    forecast.windGust > 25 ||
+                    forecast.windGust > 30 ||
                     getMinWindSpeed(weather.windSpeed) > 20
                   ) ? 'warning.light' : 'success.light'
                 })(),
