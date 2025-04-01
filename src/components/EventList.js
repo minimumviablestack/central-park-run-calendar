@@ -276,25 +276,39 @@ function EventList() {
         <Grid container item xs={12} spacing={1} sx={{ mt: 0 }}>
           <Grid item xs={12} md={8}>
             <Card elevation={2} sx={{ height: '90px' }}>
-              <CardContent sx={{ height: '100%', display: 'flex', alignItems: 'center', p: 2 }}>
+              <CardContent sx={{ height: '100%', display: 'flex', flexDirection: 'column', p: 2 }}>
                 {weatherLoading ? (
                   <Box sx={{ display: 'flex', justifyContent: 'center', p: 2, width: '100%' }}>
                     <CircularProgress size={24} />
                   </Box>
                 ) : weather ? (
-                  <Box sx={{ width: '100%', display: 'flex', alignItems: 'center' }}>
-                    <Typography variant="h3" sx={{ mr: 3, textAlign: 'center', minWidth: '140px' }}>
-                      {weather.temperature}°F
-                    </Typography>
-                    <Box>
-                      <Typography variant="body1" sx={{ mb: 0.5 }}>
-                        {weather.shortForecast}
+                  <>
+                    <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', mb: 'auto' }}>
+                      <Typography variant="h3" sx={{ mr: 3, textAlign: 'center', minWidth: '140px' }}>
+                        {weather.temperature}°F
                       </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {weather.windSpeed} {weather.windDirection}
-                      </Typography>
+                      <Box>
+                        <Typography variant="body1" sx={{ mb: 0.5 }}>
+                          {weather.shortForecast}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {weather.windSpeed} {weather.windDirection}
+                        </Typography>
+                      </Box>
                     </Box>
-                  </Box>
+                    <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'right', fontSize: '0.7rem' }}>
+                      Data: <Typography 
+                        component="a" 
+                        href="https://www.weather.gov/" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        color="text.secondary"
+                        sx={{ textDecoration: 'underline', fontSize: '0.7rem' }}
+                      >
+                        National Weather Service
+                      </Typography>
+                    </Typography>
+                  </>
                 ) : (
                   <Typography color="text.secondary" sx={{ textAlign: 'center', width: '100%' }}>
                     Weather data unavailable
@@ -303,6 +317,8 @@ function EventList() {
               </CardContent>
             </Card>
           </Grid>
+          
+          {/* Remove the separate attribution Grid item */}
           <Grid item xs={12} md={4}>
             <Card elevation={2} sx={{ height: '90px' }}>
               <CardContent sx={{ 
@@ -329,6 +345,21 @@ function EventList() {
               </CardContent>
             </Card>
           </Grid>
+          {/* Remove this Grid item with the duplicate attribution */}
+          {/* <Grid item xs={12}>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'right' }}>
+              Weather Data: <Typography 
+                component="a" 
+                href="https://www.weather.gov/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                color="text.secondary"
+                sx={{ textDecoration: 'underline' }}
+              >
+                National Weather Service
+              </Typography>
+            </Typography>
+          </Grid> */}
         </Grid>
 
         {/* DOT Camera View */}
