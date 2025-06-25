@@ -217,6 +217,7 @@ function EventList() {
                   const forecast = parseDetailedForecast(weather.detailedForecast);
                   return (
                     weather.temperature < 30 || 
+                    weather.temperature > 90 ||
                     forecast.precipChance > 80 ||
                     forecast.hasThunderstorm ||
                     forecast.rainfall > 3 ||
@@ -228,6 +229,7 @@ function EventList() {
                   const forecast = parseDetailedForecast(weather.detailedForecast);
                   return (
                     weather.temperature < 30 || 
+                    weather.temperature > 90 ||
                     forecast.precipChance > 80 ||
                     forecast.hasThunderstorm ||
                     forecast.rainfall > 3 ||
@@ -244,6 +246,7 @@ function EventList() {
                   const forecast = parseDetailedForecast(weather.detailedForecast);
                   const isBadWeather = 
                     weather.temperature < 30 || 
+                    weather.temperature > 90 ||
                     forecast.precipChance > 80 ||
                     forecast.hasThunderstorm ||
                     forecast.rainfall > 3 ||
@@ -257,6 +260,7 @@ function EventList() {
                       </Typography>
                       <Typography variant="h6" color={isBadWeather ? 'warning.dark' : 'success.dark'}>
                         {weather.temperature < 30 ? 'It\'s pretty cold out there' :
+                         weather.temperature > 90 ? 'It\'s pretty hot out there' :
                          forecast.hasThunderstorm ? 'Thunderstorms expected' :
                          forecast.precipChance > 80 ? 'High chance of precipitation' :
                          forecast.rainfall > 3 ? 'Heavy rainfall expected' :
