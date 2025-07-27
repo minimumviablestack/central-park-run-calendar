@@ -25,16 +25,26 @@ dayjs.extend(isSameOrAfter);
     return match ? parseInt(match[1]) : 0;
   };
 
-  const parseDetailedForecast = (forecast) => {
-    if (!forecast) return { precipChance: 0, hasThunderstorm: false, rainfall: 0, windGust: 0 };
+  const parseWeatherData = (weather) => {
+    if (!weather) return { precipChance: 0, hasThunderstorm: false, rainfall: 0, windGust: 0 };
     
-    const precipMatch = forecast.match(/Chance of precipitation is (\d+)%/);
-    const rainfallMatch = forecast.match(/rainfall amounts between \d+ and (\d+) inches/);
-    const gustMatch = forecast.match(/gusts as high as (\d+) mph/);
+    // For hourly forecasts, data is structured differently
+    const precipChance = weather.probabilityOfPrecipitation?.value || 0;
+    const shortForecast = weather.shortForecast || '';
+    const detailedForecast = weather.detailedForecast || '';
+    
+    // Check for thunderstorms in either forecast field
+    const hasThunderstorm = shortForecast.toLowerCase().includes('thunderstorm') || 
+                           detailedForecast.toLowerCase().includes('thunderstorm');
+    
+    // For hourly data, we primarily rely on precipChance, shortForecast for conditions
+    // Wind gusts and rainfall amounts may not be available in hourly format
+    const gustMatch = detailedForecast.match(/gusts as high as (\d+) mph/);
+    const rainfallMatch = detailedForecast.match(/rainfall amounts between \d+ and (\d+) inches/);
     
     return {
-      precipChance: precipMatch ? parseInt(precipMatch[1]) : 0,
-      hasThunderstorm: forecast.toLowerCase().includes('thunderstorm'),
+      precipChance,
+      hasThunderstorm,
       rainfall: rainfallMatch ? parseInt(rainfallMatch[1]) : 0,
       windGust: gustMatch ? parseInt(gustMatch[1]) : 0
     };
@@ -93,10 +103,18 @@ function EventList() {
         );
         const pointData = await pointResponse.json();
         
-        const forecastResponse = await fetch(pointData.properties.forecast);
+        const forecastResponse = await fetch(pointData.properties.forecastHourly);
         const forecastData = await forecastResponse.json();
         
-        setWeather(forecastData.properties.periods[0]);
+        // Find the next hour's forecast
+        const now = new Date();
+        const nextHour = now.getHours() + 1;
+        const nextHourForecast = forecastData.properties.periods.find(period => {
+          const periodStart = new Date(period.startTime);
+          return periodStart.getHours() >= nextHour && periodStart.getDate() === now.getDate();
+        }) || forecastData.properties.periods[1] || forecastData.properties.periods[0]; // fallback to next or first period
+        
+        setWeather(nextHourForecast);
         setWeatherLoading(false);
       } catch (err) {
         console.error('Weather fetch error:', err);
@@ -214,7 +232,7 @@ function EventList() {
               sx={{
                 borderLeft: 4,
                 borderColor: weather && (() => {
-                  const forecast = parseDetailedForecast(weather.detailedForecast);
+                  const forecast = parseWeatherData(weather);
                   return (
                     weather.temperature < 30 || 
                     weather.temperature > 90 ||
@@ -226,7 +244,7 @@ function EventList() {
                   ) ? 'warning.main' : 'success.main'
                 })(),
                 backgroundColor: weather && (() => {
-                  const forecast = parseDetailedForecast(weather.detailedForecast);
+                  const forecast = parseWeatherData(weather);
                   return (
                     weather.temperature < 30 || 
                     weather.temperature > 90 ||
@@ -243,7 +261,7 @@ function EventList() {
             >
               <CardContent>
                 {weather && (() => {
-                  const forecast = parseDetailedForecast(weather.detailedForecast);
+                  const forecast = parseWeatherData(weather);
                   const isBadWeather = 
                     weather.temperature < 30 || 
                     weather.temperature > 90 ||
