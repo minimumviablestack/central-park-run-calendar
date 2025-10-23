@@ -99,27 +99,17 @@ function deduplicateEvents(events) {
 
 async function fetchPageContent(url) {
   try {
-    // For NYRR website, use Puppeteer
-    if (url.includes('nyrr.org')) {
-      const browser = await puppeteer.launch({
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
-        headless: 'new'
-      });
-      const page = await browser.newPage();
-      await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36');
-      await page.goto(url, { waitUntil: 'networkidle2' });
-      const content = await page.content();
-      await browser.close();
-      return content;
-    } else {
-      // For other sites, use the existing axios method
-      const response = await axios.get(url, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36'
-        }
-      });
-      return response.data;
-    }
+    // Use Puppeteer for all websites to ensure consistent behavior and bypass anti-scraping measures
+    const browser = await puppeteer.launch({
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      headless: 'new'
+    });
+    const page = await browser.newPage();
+    await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36');
+    await page.goto(url, { waitUntil: 'networkidle2' });
+    const content = await page.content();
+    await browser.close();
+    return content;
   } catch (error) {
     console.error(`Error fetching ${url}:`, error.message);
     return null;
@@ -137,21 +127,67 @@ async function extractEventsWithLLM(htmlContent, sourceUrl) {
     // Get text content
     const textContent = $('body').text().replace(/\s+/g, ' ').trim().substring(0, 15000);
     
+    // For NYRR website, extract "Learn More" links to get additional event details
+    let learnMoreInfo = '';
+    if (sourceUrl.includes('nyrr.org')) {
+      // Extract all "Learn More" links
+      const learnMoreLinks = [];
+      $('a').each((i, elem) => {
+        const href = $(elem).attr('href');
+        const text = $(elem).text().trim().toLowerCase();
+        if ((text.includes('learn more') || text.includes('details')) && href) {
+          // Make sure we have a full URL
+          const fullUrl = href.startsWith('http') ? href : 
+                         href.startsWith('/') ? `https://www.nyrr.org${href}` : 
+                         `https://www.nyrr.org/${href}`;
+          learnMoreLinks.push(fullUrl);
+        }
+      });
+      
+      // Limit to first 3 links to avoid too many requests
+      const limitedLinks = learnMoreLinks.slice(0, 3);
+      
+      // Fetch content from each "Learn More" link
+      for (const link of limitedLinks) {
+        try {
+          console.log(`Fetching additional info from: ${link}`);
+          const browser = await puppeteer.launch({
+            args: ['--no-sandbox', '--disable-setuid-sandbox'],
+            headless: 'new'
+          });
+          const page = await browser.newPage();
+          await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36');
+          await page.goto(link, { waitUntil: 'networkidle2', timeout: 30000 });
+          const linkContent = await page.content();
+          await browser.close();
+          
+          // Extract text from the link content
+          const $link = cheerio.load(linkContent);
+          $link('script, style').remove();
+          const linkText = $link('body').text().replace(/\s+/g, ' ').trim().substring(0, 5000);
+          
+          learnMoreInfo += `\n\nAdditional information from ${link}:\n${linkText}`;
+        } catch (linkError) {
+          console.error(`Error fetching additional info from ${link}:`, linkError.message);
+        }
+      }
+    }
+    
     // Call OpenAI API to extract events
     const completion = await openai.chat.completions.create({
       model: "gpt-4",
       messages: [
         {
           role: "system", 
-          content: "You are an expert at extracting structured event data from text. Extract all events mentioned in the text and format them as JSON. Pay special attention to race events, dates, times, and locations."
+          content: "You are an expert at extracting structured event data from text. Extract all events mentioned in the text and format them as JSON. Pay special attention to race events, dates, times, and locations. For NYRR events, make sure to look for location information in the additional details sections."
         },
         {
           role: "user",
           content: `Extract all running events and races from this text from ${sourceUrl}. Focus on event name, date, time, and location. Return ONLY a JSON array with objects containing these fields: name, date (YYYY-MM-DD format), startTime, endTime, location, description, category (if available), eventUrl (direct link to the event if available). 
-          For NYRR races, look for race calendar entries(including information in the "learn more" link), upcoming events, and scheduled runs. 
+          For NYRR races, look for race calendar entries, upcoming events, and scheduled runs. Pay special attention to location information which may be in the additional details sections.
           For NYC Parks events, include the category field. 
           For NYCRUNS races, use RACE START time as event start time.
-          Here's the text: ${textContent}`
+          Here's the text: ${textContent}${learnMoreInfo}`
         }
       ],
       temperature: 0.2,
