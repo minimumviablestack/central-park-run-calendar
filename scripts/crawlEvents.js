@@ -148,9 +148,9 @@ async function extractEventsWithLLM(htmlContent, sourceUrl) {
         {
           role: "user",
           content: `Extract all running events and races from this text from ${sourceUrl}. Focus on event name, date, time, and location. Return ONLY a JSON array with objects containing these fields: name, date (YYYY-MM-DD format), startTime, endTime, location, description, category (if available), eventUrl (direct link to the event if available). 
-          For NYRR races, look for race calendar entries, upcoming events, and scheduled runs. 
+          For NYRR races, look for race calendar entries(including information in the "learn more" link), upcoming events, and scheduled runs. 
           For NYC Parks events, include the category field. 
-          For NYCRUNS races, use RACE START time as event start ime.
+          For NYCRUNS races, use RACE START time as event start time.
           Here's the text: ${textContent}`
         }
       ],
