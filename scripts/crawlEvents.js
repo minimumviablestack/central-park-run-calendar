@@ -175,7 +175,7 @@ async function extractEventsWithLLM(htmlContent, sourceUrl) {
     
     // Call OpenAI API to extract events
     const completion = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-4o",
       messages: [
         {
           role: "system", 
@@ -191,14 +191,33 @@ async function extractEventsWithLLM(htmlContent, sourceUrl) {
         }
       ],
       temperature: 0.2,
+      max_tokens: 8000, // Significantly increased max tokens to ensure complete JSON responses
     });
 
     // Parse the response
     const responseText = completion.choices[0].message.content;
+    console.log("Raw LLM response:", responseText);
+    
     try {
-      // Extract JSON from the response
+      // First try to parse the entire response as JSON
+      try {
+        const events = JSON.parse(responseText);
+        if (Array.isArray(events)) {
+          console.log("Successfully parsed entire response as JSON array");
+          // Add source URL to each event if no specific event URL is provided
+          return events.map(event => ({
+            ...event, 
+            url: event.eventUrl || sourceUrl
+          }));
+        }
+      } catch (directParseError) {
+        console.log("Response is not a direct JSON array, trying to extract JSON...");
+      }
+      
+      // Try to extract JSON from the response using regex
       const jsonMatch = responseText.match(/\[[\s\S]*\]/);
       if (jsonMatch) {
+        console.log("Found JSON array in response using regex");
         const events = JSON.parse(jsonMatch[0]);
         // Add source URL to each event if no specific event URL is provided
         return events.map(event => ({
@@ -206,7 +225,34 @@ async function extractEventsWithLLM(htmlContent, sourceUrl) {
           url: event.eventUrl || sourceUrl
         }));
       } else {
-        console.error("No JSON found in response");
+        // Try to find any JSON-like structure
+        console.error("No JSON array found in response, trying alternative parsing");
+        
+        // Look for objects that might be events
+        const objectMatches = responseText.match(/\{[^{}]*\}/g);
+        if (objectMatches && objectMatches.length > 0) {
+          console.log(`Found ${objectMatches.length} potential JSON objects`);
+          
+          const events = [];
+          for (const match of objectMatches) {
+            try {
+              const event = JSON.parse(match);
+              events.push(event);
+            } catch (objParseError) {
+              console.log(`Failed to parse object: ${match}`);
+            }
+          }
+          
+          if (events.length > 0) {
+            console.log(`Successfully parsed ${events.length} events from response`);
+            return events.map(event => ({
+              ...event, 
+              url: event.eventUrl || sourceUrl
+            }));
+          }
+        }
+        
+        console.error("No valid JSON found in response");
         return [];
       }
     } catch (parseError) {
