@@ -353,7 +353,17 @@ function EventList() {
                 <VideocamIcon color="primary" />
                 <Typography variant="subtitle1" fontWeight="bold">Live Loop (72nd St)</Typography>
               </Stack>
-              <Typography variant="caption" color="text.secondary">NYC DOT</Typography>
+              <Typography 
+                variant="caption" 
+                color="text.secondary" 
+                component="a" 
+                href="https://webcams.nyctmc.org/cameras-list"
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{ textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
+              >
+                NYC DOT
+              </Typography>
             </Box>
             <Box 
               sx={{ 
@@ -424,7 +434,16 @@ function EventList() {
                         </Grid>
                         <Grid item xs={12} sm={9}>
                           <Stack spacing={0.5}>
-                            <Typography variant="subtitle1" fontWeight="600" sx={{ lineHeight: 1.2 }}>
+                            <Typography 
+                              variant="subtitle1" 
+                              fontWeight="600" 
+                              sx={{ lineHeight: 1.2, textDecoration: 'none', display: 'block' }}
+                              component="a"
+                              href={event.URL}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              color="text.primary"
+                            >
                               {event.EVENT_NAME}
                             </Typography>
                             <Stack direction="row" spacing={1} alignItems="center">
