@@ -9,21 +9,23 @@ import {
   Typography,
   CircularProgress,
   Alert,
+  Container,
+  Chip,
+  Stack,
+  Button
 } from '@mui/material';
 import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import WbSunnyIcon from '@mui/icons-material/WbSunny';
+import VideocamIcon from '@mui/icons-material/Videocam';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import CheckroomIcon from '@mui/icons-material/Checkroom';
 import Papa from 'papaparse';
 import dayjs from 'dayjs';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 
 // Extend dayjs with the isSameOrAfter plugin
 dayjs.extend(isSameOrAfter);
-
-// Add these helper functions at the beginning of EventList component
-  const getMinWindSpeed = (windSpeedStr) => {
-    if (!windSpeedStr) return 0;
-    const match = windSpeedStr.match(/(\d+)\s*to/);
-    return match ? parseInt(match[1]) : 0;
-  };
 
   const parseWeatherData = (weather) => {
     if (!weather) return { precipChance: 0, hasThunderstorm: false, rainfall: 0, windGust: 0 };
@@ -129,17 +131,22 @@ function EventList() {
 
   if (loading) {
     return (
-      <Paper elevation={3} sx={{ maxWidth: 800, margin: '20px auto', padding: 2, textAlign: 'center' }}>
-        <CircularProgress />
-      </Paper>
+      <Container maxWidth="md" sx={{ mt: 8, textAlign: 'center' }}>
+        <CircularProgress size={60} thickness={4} />
+        <Typography variant="h6" color="text.secondary" sx={{ mt: 2 }}>
+          Checking the park...
+        </Typography>
+      </Container>
     );
   }
 
   if (error) {
     return (
-      <Paper elevation={3} sx={{ maxWidth: 800, margin: '20px auto', padding: 2 }}>
-        <Alert severity="error">{error}</Alert>
-      </Paper>
+      <Container maxWidth="md" sx={{ mt: 4 }}>
+        <Alert severity="error" variant="filled" sx={{ borderRadius: 2 }}>
+          {error}
+        </Alert>
+      </Container>
     );
   }
 
@@ -161,379 +168,304 @@ function EventList() {
   );
 
   return (
-    <Paper elevation={3} sx={{ maxWidth: 800, margin: '20px auto', padding: 2 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-        <DirectionsRunIcon sx={{ fontSize: 40, mr: 2, color: 'primary.main' }} />
-        <Typography variant="h5" gutterBottom sx={{ flex: 1 }}>
-          Should I run in the park today?
+    <Container maxWidth="md" sx={{ py: 2 }}>
+      {/* Header */}
+      <Box sx={{ textAlign: 'center', mb: 3 }}>
+        <Stack direction="row" alignItems="center" justifyContent="center" spacing={1} sx={{ mb: 0.5 }}>
+          <DirectionsRunIcon color="primary" sx={{ fontSize: 32 }} />
+          <Typography variant="h5" component="h1" fontWeight="800" color="primary.main" sx={{ letterSpacing: '-0.5px' }}>
+            Park Run Calendar
+          </Typography>
+        </Stack>
+        <Typography variant="body2" color="text.secondary" fontWeight="normal">
+          Should I run in Central Park today?
         </Typography>
       </Box>
 
-      <Grid container spacing={1}>  {/* Reduced from spacing={2} */}
-        {/* Today's events section header */}
-        {todayEvents.length > 0 ? <Grid item xs={12}>
-          <Typography variant="h6" color="info.main" sx={{ mt: 1, fontWeight: 'bold' }}>  {/* Reduced from mt: 2 */}
-            Today in Central Park
-          </Typography>
-        </Grid>:<></>}
-
-        {/* Today's events section */}
-        <Grid item xs={12} sx={{ '& > .MuiCard-root': { mb: 0.5 } }}>  {/* Reduced margin between cards */}
+      <Grid container spacing={2}>
+        {/* HERO SECTION: Today's Status */}
+        <Grid item xs={12}>
           {todayEvents.length > 0 ? (
-            todayEvents.map((event, index) => (
-              <Card 
-                elevation={3}
-                sx={{
-                  borderLeft: 4,
-                  borderColor: 'info.main',
-                  backgroundColor: 'info.light',
-                  opacity: 0.9,
-                  '&:last-child': { mb: 0 }
-                }}
-                key={`today-${index}`}
-              >
-                <CardContent sx={{ py: 1.5, px: 2 }}>  {/* Reduced vertical padding */}
-                  <Typography variant="h6" color="info.dark" fontWeight="bold" sx={{ mb: 0.5 }}>
-                    {event.EVENT_NAME}
-                  </Typography>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Box>
-                      <Typography variant="body2" color="text.secondary" fontWeight="bold">
-                        Today | {event.START_TIME}{event.END_TIME ? `-${event.END_TIME}` : ''}
-                      </Typography>
-                      {event.LOCATION && (
-                        <Typography variant="body2" color="text.secondary">
-                          Location: {event.LOCATION}
-                        </Typography>
-                      )}
-                    </Box>
-                    <Typography 
-                      component="a" 
-                      href={event.URL} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      color="primary"
-                      sx={{ textDecoration: 'none', ml: 2, whiteSpace: 'nowrap' }}
-                    >
-                      Event Details →
-                    </Typography>
-                  </Box>
-                  {event.DESCRIPTION && (
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                      {event.DESCRIPTION.substring(0, 100)}{event.DESCRIPTION.length > 100 ? '...' : ''}
-                    </Typography>
-                  )}
-                </CardContent>
-              </Card>
-            ))
-          ) : (
             <Card 
-              elevation={3}
+              elevation={0}
               sx={{
-                borderLeft: 4,
-                borderColor: weather && (() => {
-                  const forecast = parseWeatherData(weather);
-                  return (
-                    weather.temperature < 30 || 
-                    weather.temperature > 90 ||
-                    forecast.precipChance > 80 ||
-                    forecast.hasThunderstorm ||
-                    forecast.rainfall > 3 ||
-                    forecast.windGust > 30 ||
-                    getMinWindSpeed(weather.windSpeed) > 20
-                  ) ? 'warning.main' : 'success.main'
-                })(),
-                backgroundColor: weather && (() => {
-                  const forecast = parseWeatherData(weather);
-                  return (
-                    weather.temperature < 30 || 
-                    weather.temperature > 90 ||
-                    forecast.precipChance > 80 ||
-                    forecast.hasThunderstorm ||
-                    forecast.rainfall > 3 ||
-                    forecast.windGust > 30 ||
-                    getMinWindSpeed(weather.windSpeed) > 20
-                  ) ? 'warning.light' : 'success.light'
-                })(),
-                textAlign: 'center',
-                height: '100%'
+                bgcolor: 'warning.light', 
+                color: 'warning.dark',
+                border: '1px solid',
+                borderColor: 'warning.main',
+                borderRadius: 4
               }}
             >
-              <CardContent>
-                {weather && (() => {
-                  const forecast = parseWeatherData(weather);
-                  const isBadWeather = 
-                    weather.temperature < 30 || 
-                    weather.temperature > 90 ||
-                    forecast.precipChance > 80 ||
-                    forecast.hasThunderstorm ||
-                    forecast.rainfall > 3 ||
-                    forecast.windGust > 25 ||
-                    getMinWindSpeed(weather.windSpeed) > 20;
-
-                  return (
-                    <>
-                      <Typography variant="h3" color={isBadWeather ? 'warning.dark' : 'success.dark'} fontWeight="bold">
-                        {isBadWeather ? 'MAYBE' : 'YES!'}
-                      </Typography>
-                      <Typography variant="h6" color={isBadWeather ? 'warning.dark' : 'success.dark'}>
-                        {weather.temperature < 30 ? 'It\'s pretty cold out there' :
-                         weather.temperature > 90 ? 'It\'s pretty hot out there' :
-                         forecast.hasThunderstorm ? 'Thunderstorms expected' :
-                         forecast.precipChance > 80 ? 'High chance of precipitation' :
-                         forecast.rainfall > 3 ? 'Heavy rainfall expected' :
-                         forecast.windGust > 25 ? 'Strong wind gusts expected' :
-                         getMinWindSpeed(weather.windSpeed) > 20 ? 'Strong winds today' :
-                         'Great day for a run in the park'}
-                      </Typography>
-                    </>
-                  );
-                })()}
+              <CardContent sx={{ p: { xs: 2, sm: 4 } }}>
+                <Stack spacing={2}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                     <Chip 
+                       label="EVENT TODAY" 
+                       sx={{ 
+                         bgcolor: 'warning.main', 
+                         color: 'white', 
+                         fontWeight: 'bold' 
+                       }} 
+                       size="small" 
+                     />
+                  </Box>
+                  <Typography variant="h4" fontWeight="800" sx={{ lineHeight: 1 }}>
+                    Watch out for crowds.
+                  </Typography>
+                  
+                  <Stack spacing={2} sx={{ mt: 1 }}>
+                    {todayEvents.map((event, index) => (
+                      <Paper key={index} elevation={0} sx={{ p: 2, bgcolor: 'rgba(255,255,255,0.7)', borderRadius: 2 }}>
+                         <Typography variant="subtitle1" fontWeight="bold" gutterBottom color="text.primary">
+                           {event.EVENT_NAME}
+                         </Typography>
+                         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ mb: 1 }}>
+                           <Typography variant="body2" fontWeight="500" color="text.secondary">
+                             ⏰ {event.START_TIME}{event.END_TIME ? ` - ${event.END_TIME}` : ''}
+                           </Typography>
+                           {event.LOCATION && (
+                             <Typography variant="body2" fontWeight="500" color="text.secondary">
+                               📍 {event.LOCATION}
+                             </Typography>
+                           )}
+                         </Stack>
+                         <Button 
+                           variant="outlined" 
+                           color="warning" 
+                           size="small" 
+                           href={event.URL} 
+                           target="_blank"
+                           endIcon={<ArrowForwardIcon />}
+                           fullWidth
+                         >
+                           Event Details
+                         </Button>
+                      </Paper>
+                    ))}
+                  </Stack>
+                </Stack>
               </CardContent>
+            </Card>
+          ) : (
+            <Card 
+              elevation={0}
+              sx={{
+                bgcolor: weather && (() => {
+                  const forecast = parseWeatherData(weather);
+                  const isBad = weather.temperature < 30 || weather.temperature > 90 || forecast.precipChance > 80 || forecast.hasThunderstorm;
+                  return isBad ? 'warning.light' : 'success.light';
+                })(), 
+                color: weather && (() => {
+                  const forecast = parseWeatherData(weather);
+                  const isBad = weather.temperature < 30 || weather.temperature > 90 || forecast.precipChance > 80 || forecast.hasThunderstorm;
+                  return isBad ? 'warning.dark' : 'success.dark';
+                })(),
+                border: '1px solid',
+                borderColor: weather && (() => {
+                   const forecast = parseWeatherData(weather);
+                   const isBad = weather.temperature < 30 || weather.temperature > 90 || forecast.precipChance > 80 || forecast.hasThunderstorm;
+                   return isBad ? 'warning.main' : 'success.main';
+                })(),
+                borderRadius: 4
+              }}
+            >
+               <CardContent sx={{ p: { xs: 3, sm: 4 }, textAlign: 'center' }}>
+                 {weather ? (() => {
+                    const forecast = parseWeatherData(weather);
+                    const isBad = weather.temperature < 30 || weather.temperature > 90 || forecast.precipChance > 80 || forecast.hasThunderstorm;
+                    const isGreat = !isBad && forecast.precipChance < 20 && weather.temperature > 50 && weather.temperature < 75;
+                    
+                    return (
+                      <>
+                        <Typography variant="h3" fontWeight="900" sx={{ mb: 0.5, letterSpacing: '-1px' }}>
+                          {isBad ? 'MAYBE' : 'YES!'}
+                        </Typography>
+                        <Typography variant="subtitle1" fontWeight="500" sx={{ opacity: 0.9, lineHeight: 1.2 }}>
+                          {isBad ? 'Conditions are not ideal.' : isGreat ? 'It\'s a perfect day for a run!' : 'The park is open for you.'}
+                        </Typography>
+                      </>
+                    );
+                 })() : (
+                   <Typography variant="h6">Loading...</Typography>
+                 )}
+               </CardContent>
             </Card>
           )}
         </Grid>
 
-        {/* Weather information and clothing recommendation link */}
-        <Grid container item xs={12} spacing={1} sx={{ mt: 0 }}>
-          <Grid item xs={12} md={8}>
-            <Card elevation={2} sx={{ height: '90px' }}>
-              <CardContent sx={{ height: '100%', display: 'flex', flexDirection: 'column', p: 2 }}>
-                {weatherLoading ? (
-                  <Box sx={{ display: 'flex', justifyContent: 'center', p: 2, width: '100%' }}>
-                    <CircularProgress size={24} />
-                  </Box>
-                ) : weather ? (
-                  <>
-                    <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', mb: 'auto' }}>
-                      <Typography variant="h3" sx={{ mr: 3, textAlign: 'center', minWidth: '140px' }}>
-                        {weather.temperature}°F
-                      </Typography>
-                      <Box>
-                        <Typography variant="body1" sx={{ mb: 0.5 }}>
-                          {weather.shortForecast}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {weather.windSpeed} {weather.windDirection}
-                        </Typography>
-                      </Box>
-                    </Box>
-                    <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'right', fontSize: '0.7rem' }}>
-                      Data: <Typography 
-                        component="a" 
-                        href="https://www.weather.gov/" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        color="text.secondary"
-                        sx={{ textDecoration: 'underline', fontSize: '0.7rem' }}
-                      >
-                        National Weather Service
-                      </Typography>
-                    </Typography>
-                  </>
-                ) : (
-                  <Typography color="text.secondary" sx={{ textAlign: 'center', width: '100%' }}>
-                    Weather data unavailable
-                  </Typography>
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
-          
-          {/* Remove the separate attribution Grid item */}
-          <Grid item xs={12} md={4}>
-            <Card elevation={2} sx={{ height: '90px' }}>
-              <CardContent sx={{ 
-                height: '100%',
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center'
-              }}>
-                <Typography 
-                  component="a" 
-                  href="https://dressmyrun.com/place/40.80000,-73.97630" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  color="primary"
-                  sx={{ 
-                    textDecoration: 'none', 
-                    display: 'flex', 
-                    alignItems: 'center',
-                    '&:hover': { opacity: 0.8 }
-                  }}
-                >
-                  What to wear →
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          {/* Remove this Grid item with the duplicate attribution */}
-          {/* <Grid item xs={12}>
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'right' }}>
-              Weather Data: <Typography 
-                component="a" 
-                href="https://www.weather.gov/" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                color="text.secondary"
-                sx={{ textDecoration: 'underline' }}
-              >
-                National Weather Service
-              </Typography>
-            </Typography>
-          </Grid> */}
-        </Grid>
-
-        {/* DOT Camera View */}
+        {/* Weather Widget */}
         <Grid item xs={12}>
-          <Card elevation={2} sx={{ mt: 2, mb: 3 }}>
-            <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-              <Typography variant="h6" color="primary" gutterBottom sx={{ mb: 1 }}>
-                Loop Condition @ 72nd St
-              </Typography>
-              <Box sx={{ 
-                position: 'relative', 
-                width: '100%', 
-                height: 0, 
-                paddingBottom: '56.25%', 
-                overflow: 'hidden' 
-              }}>
-                <Box 
-                  component="img"
-                  src="https://webcams.nyctmc.org/api/cameras/3f04a686-f97c-4187-8968-cb09265e08ff/image"
-                  alt="Central Park @ 72nd St Post 37 - Live Camera"
-                  sx={{ 
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    border: '1px solid #eee',
-                    borderRadius: 1
-                  }}
-                  onError={(e) => {
-                    console.error('Failed to load traffic camera image');
-                  }}
-                />
-              </Box>
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1, textAlign: 'right' }}>
-                Source: <Typography 
-                  component="a" 
-                  href="https://webcams.nyctmc.org/cameras-list" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  color="text.secondary"
-                  sx={{ textDecoration: 'underline' }}
-                >
-                  NYC DOT Traffic Camera
-                </Typography>
-              </Typography>
-            </CardContent>
-          </Card>
+          <Paper elevation={0} sx={{ p: 2, borderRadius: 4, border: '1px solid', borderColor: 'divider' }}>
+            <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={2}>
+               <Stack direction="row" alignItems="center" spacing={2}>
+                  <WbSunnyIcon color="secondary" fontSize="large" />
+                  <Box>
+                    {weatherLoading ? (
+                      <CircularProgress size={20} />
+                    ) : weather ? (
+                      <>
+                        <Stack direction="row" alignItems="baseline" spacing={1}>
+                          <Typography variant="h4" fontWeight="300" sx={{ lineHeight: 1 }}>
+                            {weather.temperature}°
+                          </Typography>
+                          <Typography variant="subtitle1" fontWeight="bold">
+                            {weather.shortForecast}
+                          </Typography>
+                        </Stack>
+                        <Typography variant="body2" color="text.secondary">
+                          💨 {weather.windSpeed} • {weather.windDirection}
+                        </Typography>
+                      </>
+                    ) : (
+                      <Typography variant="caption">Weather Unavailable</Typography>
+                    )}
+                  </Box>
+               </Stack>
+               
+               <Button 
+                 variant="outlined"
+                 size="small" 
+                 startIcon={<CheckroomIcon />}
+                 href="https://dressmyrun.com/place/40.80000,-73.97630"
+                 target="_blank"
+                 sx={{ display: { xs: 'none', sm: 'flex' } }}
+               >
+                 What to wear
+               </Button>
+               <Button 
+                 variant="outlined"
+                 size="small" 
+                 href="https://dressmyrun.com/place/40.80000,-73.97630"
+                 target="_blank"
+                 sx={{ display: { xs: 'flex', sm: 'none' }, minWidth: 0, p: 1 }}
+               >
+                 <CheckroomIcon />
+               </Button>
+            </Stack>
+          </Paper>
         </Grid>
 
-        {/* Upcoming events section */}
-        {futureEvents.length > 0 && (
-          <>
-            <Grid item xs={12}>
-              <Typography variant="h6" color="primary" sx={{ mt: 2 }}>
-                Upcoming Events
-              </Typography>
-            </Grid>
-            
-            {futureEvents.map((event, index) => {
-              const eventDate = dayjs(event.DATE);
-              const isThisWeek = eventDate.diff(today, 'day') < 7;
-              
-              return (
-                <Grid item xs={12} key={`future-${index}`}>
+        {/* Camera Widget */}
+        <Grid item xs={12}>
+          <Paper elevation={0} sx={{ p: 0, borderRadius: 4, border: '1px solid', borderColor: 'divider', overflow: 'hidden' }}>
+            <Box sx={{ p: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <VideocamIcon color="primary" />
+                <Typography variant="subtitle1" fontWeight="bold">Live Loop (72nd St)</Typography>
+              </Stack>
+              <Typography variant="caption" color="text.secondary">NYC DOT</Typography>
+            </Box>
+            <Box 
+              sx={{ 
+                width: '100%', 
+                bgcolor: 'black',
+                position: 'relative',
+                paddingTop: '56.25%', // 16:9 Cinematic Ratio
+              }}
+            >
+              <Box 
+                component="img"
+                src="https://webcams.nyctmc.org/api/cameras/3f04a686-f97c-4187-8968-cb09265e08ff/image"
+                alt="Live Camera"
+                sx={{ 
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%', 
+                  height: '100%',
+                  objectFit: 'cover'
+                }}
+                onError={(e) => e.target.style.display = 'none'}
+              />
+            </Box>
+          </Paper>
+        </Grid>
+
+        {/* Upcoming Events List */}
+        <Grid item xs={12}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mt: 2, mb: 2 }}>
+            <CalendarMonthIcon color="primary" sx={{ mr: 1 }} />
+            <Typography variant="h6" fontWeight="bold">
+              Upcoming Events
+            </Typography>
+          </Box>
+          
+          {futureEvents.length > 0 ? (
+            <Stack spacing={2}>
+              {futureEvents.map((event, index) => {
+                const eventDate = dayjs(event.DATE);
+
+                return (
                   <Card 
-                    elevation={isThisWeek ? 2 : 1}
-                    sx={{
-                      borderLeft: isThisWeek ? 2 : 0,
-                      borderColor: 'primary.main',
-                      backgroundColor: isThisWeek ? 'action.hover' : 'background.paper'
+                    key={index} 
+                    elevation={0} 
+                    sx={{ 
+                      borderRadius: 4, 
+                      border: '1px solid', 
+                      borderColor: 'divider',
+                      transition: 'transform 0.2s',
+                      '&:hover': {
+                        bgcolor: 'background.default',
+                        transform: 'translateY(-2px)'
+                      }
                     }}
                   >
-                    <CardContent>
-                      <Typography variant="h6" color="primary">
-                        {event.EVENT_NAME}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {eventDate.format('dddd, MMMM D, YYYY')} | {event.START_TIME}{event.END_TIME ? `-${event.END_TIME}` : ''}
-                      </Typography>
-                      {event.LOCATION && (
-                        <Typography variant="body2" color="text.secondary">
-                          Location: {event.LOCATION}
-                        </Typography>
-                      )}
-                      {event.DESCRIPTION && (
-                        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                          {event.DESCRIPTION.substring(0, 100)}{event.DESCRIPTION.length > 100 ? '...' : ''}
-                        </Typography>
-                      )}
-                      <Box sx={{ mt: 1 }}>
-                        <Typography 
-                          component="a" 
-                          href={event.URL} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          color="primary"
-                          sx={{ textDecoration: 'none' }}
-                        >
-                          Event Details →
-                        </Typography>
-                      </Box>
+                    <CardContent sx={{ p: 2 }}>
+                      <Grid container alignItems="center" spacing={2}>
+                        <Grid item xs={12} sm={3}>
+                           <Box sx={{ textAlign: { xs: 'left', sm: 'center' } }}>
+                             <Typography variant="subtitle1" fontWeight="bold" color="primary">
+                               {eventDate.format('MMM D')}
+                             </Typography>
+                             <Typography variant="caption" color="text.secondary" fontWeight="bold">
+                               {eventDate.format('dddd')}
+                             </Typography>
+                           </Box>
+                        </Grid>
+                        <Grid item xs={12} sm={9}>
+                          <Stack spacing={0.5}>
+                            <Typography variant="subtitle1" fontWeight="600" sx={{ lineHeight: 1.2 }}>
+                              {event.EVENT_NAME}
+                            </Typography>
+                            <Stack direction="row" spacing={1} alignItems="center">
+                              <Chip label={event.START_TIME} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.7rem' }} />
+                              {event.LOCATION && (
+                                <Typography variant="caption" color="text.secondary" noWrap>
+                                  📍 {event.LOCATION}
+                                </Typography>
+                              )}
+                            </Stack>
+                          </Stack>
+                        </Grid>
+                      </Grid>
                     </CardContent>
                   </Card>
-                </Grid>
-              );
-            })}
-          </>
-        )}
-        
-        {/* No events message */}
-        {upcomingEvents.length === 0 && (
-          <Grid item xs={12}>
-            <Alert severity="success">
-              No upcoming events! It's a great time to run in the park.
-            </Alert>
-          </Grid>
-        )}
-        
-        {/* Footer links - GitHub and About moved here */}
+                );
+              })}
+            </Stack>
+          ) : (
+            <Paper sx={{ p: 4, textAlign: 'center', bgcolor: 'background.default', borderRadius: 4 }} elevation={0}>
+              <Typography color="text.secondary">
+                No upcoming events found. Enjoy the open road!
+              </Typography>
+            </Paper>
+          )}
+        </Grid>
+
+        {/* Footer */}
         <Grid item xs={12}>
-          <Box sx={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
-            gap: 3, 
-            mt: 4, 
-            pt: 2,
-            borderTop: '1px solid #eee'
-          }}>
-            <Typography 
-              component="a" 
-              href="https://github.com/minimumviablestack/central-park-run-calendar" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              color="text.secondary"
-              sx={{ textDecoration: 'none', fontSize: '0.875rem' }}
-            >
-              GitHub
-            </Typography>
-            <Typography 
-              component={Link} 
-              to="/about"
-              color="text.secondary"
-              sx={{ textDecoration: 'none', fontSize: '0.875rem' }}
-            >
-              About
-            </Typography>
+          <Box sx={{ py: 4, textAlign: 'center', borderTop: '1px solid', borderColor: 'divider' }}>
+             <Typography variant="body2" color="text.secondary">
+               Built for runners, by runners.
+             </Typography>
+             <Stack direction="row" spacing={2} justifyContent="center" sx={{ mt: 1 }}>
+               <Link to="/about" style={{ color: '#666', textDecoration: 'none', fontSize: '0.875rem' }}>About</Link>
+               <a href="https://github.com/minimumviablestack/central-park-run-calendar" target="_blank" rel="noreferrer" style={{ color: '#666', textDecoration: 'none', fontSize: '0.875rem' }}>GitHub</a>
+             </Stack>
           </Box>
         </Grid>
       </Grid>
-    </Paper>
+    </Container>
   );
 }
 
