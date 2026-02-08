@@ -475,7 +475,7 @@ function EventList() {
         <Grid item xs={12}>
           <Box sx={{ py: 4, textAlign: 'center', borderTop: '1px solid', borderColor: 'divider' }}>
              <Typography variant="body2" color="text.secondary">
-               Built for runners, by runners.
+               Built for runners, by a runner and his AI agent friends.
              </Typography>
              <Stack direction="row" spacing={2} justifyContent="center" sx={{ mt: 1 }}>
                <Link to="/about" style={{ color: '#666', textDecoration: 'none', fontSize: '0.875rem' }}>About</Link>
