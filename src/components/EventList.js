@@ -11,62 +11,32 @@ import {
   Alert,
   Container,
   Chip,
-  Stack,
-  Button
+  Stack
 } from '@mui/material';
 import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import WbSunnyIcon from '@mui/icons-material/WbSunny';
 import VideocamIcon from '@mui/icons-material/Videocam';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import CheckroomIcon from '@mui/icons-material/Checkroom';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import AcUnitIcon from '@mui/icons-material/AcUnit';
 import Papa from 'papaparse';
 import dayjs from 'dayjs';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+import useWeather from '../hooks/useWeather';
+import WeatherAlerts from './WeatherAlerts';
+import WeatherWidget from './WeatherWidget';
+import HeroStatus from './HeroStatus';
 
-// Extend dayjs with the isSameOrAfter plugin
 dayjs.extend(isSameOrAfter);
-
-  const parseWeatherData = (weather) => {
-    if (!weather) return { precipChance: 0, hasThunderstorm: false, rainfall: 0, windGust: 0 };
-    
-    // For hourly forecasts, data is structured differently
-    const precipChance = weather.probabilityOfPrecipitation?.value || 0;
-    const shortForecast = weather.shortForecast || '';
-    const detailedForecast = weather.detailedForecast || '';
-    
-    // Check for thunderstorms in either forecast field
-    const hasThunderstorm = shortForecast.toLowerCase().includes('thunderstorm') || 
-                           detailedForecast.toLowerCase().includes('thunderstorm');
-    
-    // For hourly data, we primarily rely on precipChance, shortForecast for conditions
-    // Wind gusts and rainfall amounts may not be available in hourly format
-    const gustMatch = detailedForecast.match(/gusts as high as (\d+) mph/);
-    const rainfallMatch = detailedForecast.match(/rainfall amounts between \d+ and (\d+) inches/);
-    
-    return {
-      precipChance,
-      hasThunderstorm,
-      rainfall: rainfallMatch ? parseInt(rainfallMatch[1]) : 0,
-      windGust: gustMatch ? parseInt(gustMatch[1]) : 0
-    };
-  };
 
 function EventList() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [weather, setWeather] = useState(null);
-  const [weatherLoading, setWeatherLoading] = useState(true);
-  const [alerts, setAlerts] = useState([]);
+  const { weather, weatherLoading, alerts } = useWeather();
 
   useEffect(() => {
     const fetchEvents = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/data/events.csv'); // Updated path
+        const response = await fetch('/data/events.csv');
         if (!response.ok) {
           throw new Error('Failed to fetch events data');
         }
@@ -74,7 +44,6 @@ function EventList() {
         Papa.parse(csvText, {
           header: true,
           complete: (results) => {
-            // Filter out empty rows and sort events by date
             const filteredData = results.data.filter(row => 
               row.DATE && row.EVENT_NAME && Object.keys(row).length > 0
             );
@@ -99,63 +68,6 @@ function EventList() {
     fetchEvents();
   }, []);
 
-  // Add weather fetch effect
-  useEffect(() => {
-    const fetchWeather = async () => {
-      try {
-        const pointResponse = await fetch(
-          'https://api.weather.gov/points/40.7812,-73.9665'
-        );
-        const pointData = await pointResponse.json();
-        
-        const forecastResponse = await fetch(pointData.properties.forecastHourly);
-        const forecastData = await forecastResponse.json();
-        
-        // Find the next hour's forecast
-        const now = new Date();
-        const nextHour = now.getHours() + 1;
-        const nextHourForecast = forecastData.properties.periods.find(period => {
-          const periodStart = new Date(period.startTime);
-          return periodStart.getHours() >= nextHour && periodStart.getDate() === now.getDate();
-        }) || forecastData.properties.periods[1] || forecastData.properties.periods[0]; // fallback to next or first period
-        
-        setWeather(nextHourForecast);
-        setWeatherLoading(false);
-      } catch (err) {
-        console.error('Weather fetch error:', err);
-        setWeatherLoading(false);
-      }
-    };
-
-    const fetchAlerts = async () => {
-      try {
-        const response = await fetch(
-          'https://api.weather.gov/alerts/active?point=40.7812,-73.9665'
-        );
-        const data = await response.json();
-        
-        if (data.features && data.features.length > 0) {
-          const activeAlerts = data.features.map(feature => ({
-            event: feature.properties.event,
-            severity: feature.properties.severity,
-            headline: feature.properties.headline,
-            description: feature.properties.description,
-            instruction: feature.properties.instruction,
-            expires: feature.properties.expires
-          }));
-          setAlerts(activeAlerts);
-        }
-      } catch (err) {
-        console.error('Alerts fetch error:', err);
-      }
-    };
-
-    fetchWeather();
-    fetchAlerts();
-  }, []);
-
-  // Removed useEffect for camera refresh
-
   if (loading) {
     return (
       <Container maxWidth="md" sx={{ mt: 8, textAlign: 'center' }}>
@@ -179,17 +91,14 @@ function EventList() {
 
   const today = dayjs();
   
-  // Filter to only show current and future events
   const upcomingEvents = events.filter(event => 
     dayjs(event.DATE).isSameOrAfter(today, 'day')
   );
   
-  // Separate today's events
   const todayEvents = upcomingEvents.filter(event => 
     dayjs(event.DATE).isSame(today, 'day')
   );
   
-  // Future events (not today)
   const futureEvents = upcomingEvents.filter(event => 
     !dayjs(event.DATE).isSame(today, 'day')
   );
@@ -213,212 +122,18 @@ function EventList() {
         {/* Weather Alerts */}
         {alerts.length > 0 && (
           <Grid item xs={12}>
-            <Stack spacing={1}>
-              {alerts.map((alert, index) => {
-                const isSevere = alert.severity === 'Severe' || alert.severity === 'Extreme';
-                const isCold = alert.event.toLowerCase().includes('cold') || alert.event.toLowerCase().includes('freeze');
-                
-                return (
-                  <Card 
-                    key={index}
-                    elevation={0}
-                    sx={{
-                      bgcolor: isSevere ? 'error.light' : 'warning.light',
-                      color: isSevere ? 'error.dark' : 'warning.dark',
-                      border: '2px solid',
-                      borderColor: isSevere ? 'error.main' : 'warning.main',
-                      borderRadius: 3
-                    }}
-                  >
-                    <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-                      <Stack spacing={1}>
-                        <Stack direction="row" alignItems="center" spacing={1}>
-                          {isCold ? (
-                            <AcUnitIcon sx={{ color: isSevere ? 'error.dark' : 'warning.dark' }} />
-                          ) : (
-                            <WarningAmberIcon sx={{ color: isSevere ? 'error.dark' : 'warning.dark' }} />
-                          )}
-                          <Typography variant="subtitle1" fontWeight="800">
-                            {alert.event}
-                          </Typography>
-                        </Stack>
-                        <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                          {alert.headline}
-                        </Typography>
-                        {alert.instruction && (
-                          <Typography variant="body2" sx={{ fontStyle: 'italic', opacity: 0.8 }}>
-                            💡 {alert.instruction.split('\n')[0]}
-                          </Typography>
-                        )}
-                      </Stack>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </Stack>
+            <WeatherAlerts alerts={alerts} />
           </Grid>
         )}
 
         {/* HERO SECTION: Today's Status */}
         <Grid item xs={12}>
-          {todayEvents.length > 0 ? (
-            <Card 
-              elevation={0}
-              sx={{
-                bgcolor: 'warning.light', 
-                color: 'warning.dark',
-                border: '1px solid',
-                borderColor: 'warning.main',
-                borderRadius: 4
-              }}
-            >
-              <CardContent sx={{ p: { xs: 2, sm: 4 } }}>
-                <Stack spacing={2}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                     <Chip 
-                       label="EVENT TODAY" 
-                       sx={{ 
-                         bgcolor: 'warning.main', 
-                         color: 'white', 
-                         fontWeight: 'bold' 
-                       }} 
-                       size="small" 
-                     />
-                  </Box>
-                  <Typography variant="h4" fontWeight="800" sx={{ lineHeight: 1 }}>
-                    Watch out for crowds.
-                  </Typography>
-                  
-                  <Stack spacing={2} sx={{ mt: 1 }}>
-                    {todayEvents.map((event, index) => (
-                      <Paper key={index} elevation={0} sx={{ p: 2, bgcolor: 'rgba(255,255,255,0.7)', borderRadius: 2 }}>
-                         <Typography variant="subtitle1" fontWeight="bold" gutterBottom color="text.primary">
-                           {event.EVENT_NAME}
-                         </Typography>
-                         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ mb: 1 }}>
-                           <Typography variant="body2" fontWeight="500" color="text.secondary">
-                             ⏰ {event.START_TIME}{event.END_TIME ? ` - ${event.END_TIME}` : ''}
-                           </Typography>
-                           {event.LOCATION && (
-                             <Typography variant="body2" fontWeight="500" color="text.secondary">
-                               📍 {event.LOCATION}
-                             </Typography>
-                           )}
-                         </Stack>
-                         <Button 
-                           variant="outlined" 
-                           color="warning" 
-                           size="small" 
-                           href={event.URL} 
-                           target="_blank"
-                           endIcon={<ArrowForwardIcon />}
-                           fullWidth
-                         >
-                           Event Details
-                         </Button>
-                      </Paper>
-                    ))}
-                  </Stack>
-                </Stack>
-              </CardContent>
-            </Card>
-          ) : (
-            <Card 
-              elevation={0}
-              sx={{
-                bgcolor: weather && (() => {
-                  const forecast = parseWeatherData(weather);
-                  const isBad = weather.temperature < 30 || weather.temperature > 90 || forecast.precipChance > 80 || forecast.hasThunderstorm;
-                  return isBad ? 'warning.light' : 'success.light';
-                })(), 
-                color: weather && (() => {
-                  const forecast = parseWeatherData(weather);
-                  const isBad = weather.temperature < 30 || weather.temperature > 90 || forecast.precipChance > 80 || forecast.hasThunderstorm;
-                  return isBad ? 'warning.dark' : 'success.dark';
-                })(),
-                border: '1px solid',
-                borderColor: weather && (() => {
-                   const forecast = parseWeatherData(weather);
-                   const isBad = weather.temperature < 30 || weather.temperature > 90 || forecast.precipChance > 80 || forecast.hasThunderstorm;
-                   return isBad ? 'warning.main' : 'success.main';
-                })(),
-                borderRadius: 4
-              }}
-            >
-               <CardContent sx={{ p: { xs: 3, sm: 4 }, textAlign: 'center' }}>
-                 {weather ? (() => {
-                    const forecast = parseWeatherData(weather);
-                    const isBad = weather.temperature < 30 || weather.temperature > 90 || forecast.precipChance > 80 || forecast.hasThunderstorm;
-                    const isGreat = !isBad && forecast.precipChance < 20 && weather.temperature > 50 && weather.temperature < 75;
-                    
-                    return (
-                      <>
-                        <Typography variant="h3" fontWeight="900" sx={{ mb: 0.5, letterSpacing: '-1px' }}>
-                          {isBad ? 'MAYBE' : 'YES!'}
-                        </Typography>
-                        <Typography variant="subtitle1" fontWeight="500" sx={{ opacity: 0.9, lineHeight: 1.2 }}>
-                          {isBad ? 'Conditions are not ideal.' : isGreat ? 'It\'s a perfect day for a run!' : 'The park is open for you.'}
-                        </Typography>
-                      </>
-                    );
-                 })() : (
-                   <Typography variant="h6">Loading...</Typography>
-                 )}
-               </CardContent>
-            </Card>
-          )}
+          <HeroStatus todayEvents={todayEvents} weather={weather} />
         </Grid>
 
         {/* Weather Widget */}
         <Grid item xs={12}>
-          <Paper elevation={0} sx={{ p: 2, borderRadius: 4, border: '1px solid', borderColor: 'divider' }}>
-            <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={2}>
-               <Stack direction="row" alignItems="center" spacing={2}>
-                  <WbSunnyIcon color="secondary" fontSize="large" />
-                  <Box>
-                    {weatherLoading ? (
-                      <CircularProgress size={20} />
-                    ) : weather ? (
-                      <>
-                        <Stack direction="row" alignItems="baseline" spacing={1}>
-                          <Typography variant="h4" fontWeight="300" sx={{ lineHeight: 1 }}>
-                            {weather.temperature}°
-                          </Typography>
-                          <Typography variant="subtitle1" fontWeight="bold">
-                            {weather.shortForecast}
-                          </Typography>
-                        </Stack>
-                        <Typography variant="body2" color="text.secondary">
-                          💨 {weather.windSpeed} • {weather.windDirection}
-                        </Typography>
-                      </>
-                    ) : (
-                      <Typography variant="caption">Weather Unavailable</Typography>
-                    )}
-                  </Box>
-               </Stack>
-               
-               <Button 
-                 variant="outlined"
-                 size="small" 
-                 startIcon={<CheckroomIcon />}
-                 href="https://dressmyrun.com/place/40.80000,-73.97630"
-                 target="_blank"
-                 sx={{ display: { xs: 'none', sm: 'flex' } }}
-               >
-                 What to wear
-               </Button>
-               <Button 
-                 variant="outlined"
-                 size="small" 
-                 href="https://dressmyrun.com/place/40.80000,-73.97630"
-                 target="_blank"
-                 sx={{ display: { xs: 'flex', sm: 'none' }, minWidth: 0, p: 1 }}
-               >
-                 <CheckroomIcon />
-               </Button>
-            </Stack>
-          </Paper>
+          <WeatherWidget weather={weather} weatherLoading={weatherLoading} />
         </Grid>
 
         {/* Camera Widget */}
