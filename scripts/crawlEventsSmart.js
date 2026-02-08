@@ -352,7 +352,7 @@ function parseNYRRDate(dateStr) {
 }
 
 async function fetchNYRREventsWithDetailPages() {
-  console.log('Fetching NYRR events from full race year index...');
+  console.log('Fetching NYRR events from race calendar...');
   
   const browser = await puppeteer.launch({
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
@@ -363,100 +363,84 @@ async function fetchNYRREventsWithDetailPages() {
     const page = await browser.newPage();
     await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36');
     
-    await page.goto('https://www.nyrr.org/fullraceyearindex', { waitUntil: 'networkidle2', timeout: 60000 });
-    await new Promise(r => setTimeout(r, 2000));
+    await page.goto('https://www.nyrr.org/run/race-calendar', { waitUntil: 'networkidle2', timeout: 60000 });
+    await new Promise(r => setTimeout(r, 3000));
     
     const events = await page.evaluate(() => {
       const results = [];
+      const monthAbbrevToNum = {
+        'JAN': '01', 'FEB': '02', 'MAR': '03', 'APR': '04',
+        'MAY': '05', 'JUN': '06', 'JUL': '07', 'AUG': '08',
+        'SEP': '09', 'OCT': '10', 'NOV': '11', 'DEC': '12'
+      };
       
-      const allLinks = document.querySelectorAll('a[href*="/run/"], a[href*="/races/"], a[href*="/events/"]');
-      const linkMap = new Map();
+      const raceCards = document.querySelectorAll('.upcoming-event, .upcoming-race');
       
-      allLinks.forEach(link => {
-        const href = link.getAttribute('href');
-        const text = link.textContent?.trim();
-        if (href && text && text.length > 5) {
-          linkMap.set(text.toLowerCase(), {
-            href: href.startsWith('http') ? href : `https://www.nyrr.org${href}`,
-            text: text
-          });
-        }
-      });
-      
-      const containers = document.querySelectorAll('tr, div[class*="race"], div[class*="event"], article, section');
-      
-      containers.forEach(container => {
-        const text = container.innerText || '';
+      raceCards.forEach(card => {
+        const text = card.innerText || '';
         const lowerText = text.toLowerCase();
         
-        if (lowerText.includes('central park')) {
-          const links = container.querySelectorAll('a');
-          let eventUrl = '';
-          let eventName = '';
-          
-          links.forEach(link => {
-            const href = link.getAttribute('href') || '';
-            const linkText = link.textContent?.trim() || '';
-            
-            const isEventDetailLink = (href.includes('/run/') || href.includes('/races/') || href.includes('/events/')) 
-                && linkText.length > 5 
-                && !linkText.toLowerCase().includes('learn more')
-                && !linkText.toLowerCase().includes('register');
-            
-            if (isEventDetailLink) {
-              eventUrl = href.startsWith('http') ? href : `https://www.nyrr.org${href}`;
-              eventName = linkText;
-            }
-          });
-          
-          const dateMatch = text.match(/(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2}(?:,?\s*\d{4})?/i);
-          const dateStr = dateMatch ? dateMatch[0] : '';
-          
-          if (!eventName) {
-            const nameMatch = text.match(/([A-Z][A-Za-z\s&'"-]+(?:5K|10K|Half|Marathon|Mile|4M|Run|Race|Walk|Classic))/);
-            eventName = nameMatch ? nameMatch[1].trim() : '';
-          }
-          
-          if (eventName && dateStr) {
-            const key = eventName.toLowerCase();
-            const isDuplicate = results.find(r => r.name.toLowerCase() === key);
-            if (!isDuplicate) {
-              results.push({
-                name: eventName,
-                dateStr: dateStr,
-                url: eventUrl || 'https://www.nyrr.org/fullraceyearindex'
-              });
-            }
+        const mentionsCentralPark = lowerText.includes('central park');
+        const isNewYorkLocation = lowerText.includes('new york') && !lowerText.includes('brooklyn') && !lowerText.includes('queens') && !lowerText.includes('bronx') && !lowerText.includes('staten island');
+        const isVirtual = lowerText.includes('virtual');
+        const isRoadRace = lowerText.includes('4 miles') || lowerText.includes('4m') || lowerText.includes('5k') || lowerText.includes('10k') || lowerText.includes('half marathon') || lowerText.includes('marathon');
+        
+        const isCentralParkRace = mentionsCentralPark || (isNewYorkLocation && isRoadRace && !isVirtual);
+        if (!isCentralParkRace) return;
+        
+        const dateEl = card.querySelector('.upcoming-race-date, [class*="date"]');
+        const dateText = dateEl ? dateEl.innerText.trim() : '';
+        
+        const dayMatch = dateText.match(/(\d{1,2})/);
+        const monthMatch = dateText.match(/(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)/i);
+        
+        let dateStr = '';
+        if (dayMatch && monthMatch) {
+          const day = dayMatch[1].padStart(2, '0');
+          const monthNum = monthAbbrevToNum[monthMatch[1].toUpperCase()];
+          if (monthNum) {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth() + 1;
+            const eventMonth = parseInt(monthNum, 10);
+            const year = eventMonth < currentMonth ? currentYear + 1 : currentYear;
+            dateStr = `${year}-${monthNum}-${day}`;
           }
         }
-      });
-      
-      const bodyText = document.body.innerText;
-      const lines = bodyText.split('\n');
-      
-      lines.forEach((line, i) => {
-        const lowerLine = line.toLowerCase();
-        if (lowerLine.includes('central park') && 
-            (lowerLine.includes('run') || 
-             lowerLine.includes('race') || 
-             lowerLine.includes('marathon') ||
-             lowerLine.includes('half') ||
-             line.match(/\d+K/i))) {
-          
-          const context = lines.slice(Math.max(0, i-2), i+2).join(' ');
-          const dateMatch = context.match(/(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2}(?:,?\s*\d{4})?/i);
-          const nameMatch = context.match(/([A-Z][A-Za-z\s&'"-]+(?:5K|10K|Half|Marathon|Mile|4M|Run|Race|Walk|Classic))/);
-          
-          if (nameMatch && dateMatch) {
-            const name = nameMatch[1].trim();
-            const key = name.toLowerCase();
-            if (!results.find(r => r.name.toLowerCase() === key)) {
-              results.push({
-                name: name,
-                dateStr: dateMatch[0],
-                url: 'https://www.nyrr.org/fullraceyearindex'
-              });
-            }
+        
+        const nameEl = card.querySelector('.upcoming-race-title, h3, h4, [class*="title"]');
+        let name = '';
+        if (nameEl) {
+          name = nameEl.innerText.trim();
+        } else {
+          const lines = text.split('\n').filter(l => l.trim().length > 5);
+          for (const line of lines) {
+            if (line.match(/\d{1,2}/) && line.match(/(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)/i)) continue;
+            if (line.match(/^\d{1,2}:\d{2}/)) continue;
+            if (line.toLowerCase().includes('new york')) continue;
+            if (line.match(/^\$\d+/)) continue;
+            if (line.toLowerCase().includes('learn more')) continue;
+            if (line.match(/^(half marathon|10k|5k|4 miles|\d+ miles?)$/i)) continue;
+            name = line.trim();
+            break;
+          }
+        }
+        
+        const timeMatch = text.match(/(\d{1,2}:\d{2}\s*(?:AM|PM)?)/i);
+        const startTime = timeMatch ? timeMatch[1].trim() : '';
+        
+        const linkEl = card.querySelector('a[href*="/run/"], a[href*="events.nyrr.org"]');
+        let url = 'https://www.nyrr.org/run/race-calendar';
+        if (linkEl) {
+          const href = linkEl.getAttribute('href');
+          url = href.startsWith('http') ? href : `https://www.nyrr.org${href}`;
+        }
+        
+        if (name && dateStr && name.length > 5) {
+          const key = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+          const isDuplicate = results.find(r => r.name.toLowerCase().replace(/[^a-z0-9]/g, '') === key);
+          if (!isDuplicate) {
+            results.push({ name, dateStr, startTime, url });
           }
         }
       });
@@ -468,13 +452,13 @@ async function fetchNYRREventsWithDetailPages() {
     
     const centralParkEvents = events.map(e => ({
       name: e.name,
-      date: parseNYRRDate(e.dateStr),
-      startTime: '',
+      date: e.dateStr,
+      startTime: e.startTime,
       endTime: '',
-      location: 'Central Park',
+      location: 'Central Park, New York',
       description: 'NYRR Race',
       url: e.url
-    })).filter(e => e.date);
+    }));
     
     console.log(`Found ${centralParkEvents.length} Central Park events from NYRR`);
     return centralParkEvents;
@@ -683,7 +667,7 @@ async function main() {
   console.log('\n--- NYC Parks Website (Structured Parsing) ---');
   const nycParksEvents = await fetchNYCParksEventsStructured();
   
-  const runningKeywords = ['run', 'race', 'marathon', 'triathlon', '5k', '10k', 'half', 'walk'];
+  const runningKeywords = ['run', 'race', 'marathon', 'triathlon', '5k', '10k', 'half'];
   const largeEventKeywords = ['concert', 'festival', 'rally', 'parade'];
   
   const filteredParksEvents = nycParksEvents.filter(event => {
@@ -692,6 +676,10 @@ async function main() {
     const location = (event.location || '').toLowerCase();
     
     if (location.includes('lawn') || location.includes('playground') || name.includes('lawn closure')) {
+      return false;
+    }
+    
+    if (name.includes('walk') && !name.includes('run')) {
       return false;
     }
     
