@@ -20,6 +20,8 @@ import WbSunnyIcon from '@mui/icons-material/WbSunny';
 import VideocamIcon from '@mui/icons-material/Videocam';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import CheckroomIcon from '@mui/icons-material/Checkroom';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import AcUnitIcon from '@mui/icons-material/AcUnit';
 import Papa from 'papaparse';
 import dayjs from 'dayjs';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
@@ -58,6 +60,7 @@ function EventList() {
   const [error, setError] = useState(null);
   const [weather, setWeather] = useState(null);
   const [weatherLoading, setWeatherLoading] = useState(true);
+  const [alerts, setAlerts] = useState([]);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -124,7 +127,31 @@ function EventList() {
       }
     };
 
+    const fetchAlerts = async () => {
+      try {
+        const response = await fetch(
+          'https://api.weather.gov/alerts/active?point=40.7812,-73.9665'
+        );
+        const data = await response.json();
+        
+        if (data.features && data.features.length > 0) {
+          const activeAlerts = data.features.map(feature => ({
+            event: feature.properties.event,
+            severity: feature.properties.severity,
+            headline: feature.properties.headline,
+            description: feature.properties.description,
+            instruction: feature.properties.instruction,
+            expires: feature.properties.expires
+          }));
+          setAlerts(activeAlerts);
+        }
+      } catch (err) {
+        console.error('Alerts fetch error:', err);
+      }
+    };
+
     fetchWeather();
+    fetchAlerts();
   }, []);
 
   // Removed useEffect for camera refresh
@@ -183,6 +210,55 @@ function EventList() {
       </Box>
 
       <Grid container spacing={2}>
+        {/* Weather Alerts */}
+        {alerts.length > 0 && (
+          <Grid item xs={12}>
+            <Stack spacing={1}>
+              {alerts.map((alert, index) => {
+                const isSevere = alert.severity === 'Severe' || alert.severity === 'Extreme';
+                const isCold = alert.event.toLowerCase().includes('cold') || alert.event.toLowerCase().includes('freeze');
+                
+                return (
+                  <Card 
+                    key={index}
+                    elevation={0}
+                    sx={{
+                      bgcolor: isSevere ? 'error.light' : 'warning.light',
+                      color: isSevere ? 'error.dark' : 'warning.dark',
+                      border: '2px solid',
+                      borderColor: isSevere ? 'error.main' : 'warning.main',
+                      borderRadius: 3
+                    }}
+                  >
+                    <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                      <Stack spacing={1}>
+                        <Stack direction="row" alignItems="center" spacing={1}>
+                          {isCold ? (
+                            <AcUnitIcon sx={{ color: isSevere ? 'error.dark' : 'warning.dark' }} />
+                          ) : (
+                            <WarningAmberIcon sx={{ color: isSevere ? 'error.dark' : 'warning.dark' }} />
+                          )}
+                          <Typography variant="subtitle1" fontWeight="800">
+                            {alert.event}
+                          </Typography>
+                        </Stack>
+                        <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                          {alert.headline}
+                        </Typography>
+                        {alert.instruction && (
+                          <Typography variant="body2" sx={{ fontStyle: 'italic', opacity: 0.8 }}>
+                            💡 {alert.instruction.split('\n')[0]}
+                          </Typography>
+                        )}
+                      </Stack>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </Stack>
+          </Grid>
+        )}
+
         {/* HERO SECTION: Today's Status */}
         <Grid item xs={12}>
           {todayEvents.length > 0 ? (

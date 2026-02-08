@@ -36,7 +36,8 @@
 
 ### Common Commands
 *   **Start Dev Server:** `npm start` (Runs the React app at http://localhost:3000)
-*   **Update Event Data:** `npm run crawl` (Runs the scraper. **Requires .env file with OPENAI_API_KEY**)
+*   **Update Event Data (Original):** `npm run crawl` (Runs the original scraper. **Requires .env file with OPENAI_API_KEY**)
+*   **Update Event Data (Smart):** `npm run crawl:smart` (Runs the smart scraper with NYC Open Data API + structured HTML parsing. OpenAI key optional.)
 *   **Build for Production:** `npm run build` (Creates static assets in `build/`)
 *   **Deploy:** `npm run deploy` (Deploys `build/` folder to GitHub Pages)
 
