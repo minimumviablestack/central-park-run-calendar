@@ -5,6 +5,7 @@
   "scripts": {
     "start": "react-scripts start",
     "crawl": "node scripts/crawlEvents.js",
+    "crawl:smart": "node scripts/crawlEventsSmart.js",
     "build": "CI=false react-scripts build && cp -r data build/",
     "deploy": "gh-pages -d build"
   },
