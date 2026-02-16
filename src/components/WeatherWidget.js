@@ -24,7 +24,7 @@ function WeatherWidget({ weather, weatherLoading }) {
 
   return (
     <Paper elevation={0} sx={{ p: 2, borderRadius: 4, border: '1px solid', borderColor: 'divider' }}>
-      <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={2}>
+      <Stack direction={{ xs: 'column', sm: 'row' }} alignItems={{ xs: 'flex-start', sm: 'center' }} justifyContent="space-between" spacing={2}>
         <Stack direction="row" alignItems="center" spacing={2}>
           <WbSunnyIcon color="secondary" fontSize="large" />
           <Box>
@@ -40,7 +40,7 @@ function WeatherWidget({ weather, weatherLoading }) {
                     {weather.shortForecast}
                   </Typography>
                 </Stack>
-                <Stack direction="row" spacing={2} alignItems="center">
+                <Stack direction="row" spacing={2} alignItems="center" sx={{ flexWrap: 'wrap', gap: 1 }}>
                   <Typography variant="body2" color="text.secondary">
                     {displayWind} • {weather.windDirection}
                   </Typography>
@@ -62,7 +62,7 @@ function WeatherWidget({ weather, weatherLoading }) {
           </Box>
         </Stack>
         
-        <Stack direction="row" spacing={1} alignItems="center">
+        <Stack direction="row" spacing={1} alignItems="center" sx={{ width: { xs: '100%', sm: 'auto' }, justifyContent: 'space-between' }}>
           <AQIBadge />
           <ToggleButtonGroup
             value={units}

@@ -51,16 +51,23 @@ function calcSunriseOrSunset(lat, lon, date, isSunrise) {
 }
 
 export function getSunriseSunset(lat, lon, date = new Date()) {
+  // Get NYC timezone offset in hours
+  const nycOffset = -new Date().getTimezoneOffset() / 60;
+  
   const sunrise = calcSunriseOrSunset(lat, lon, date, true);
   const sunset = calcSunriseOrSunset(lat, lon, date, false);
 
+  const adjustForNYC = (time) => {
+    if (!time) return null;
+    let hours = time.hours + nycOffset;
+    if (hours < 0) hours += 24;
+    if (hours >= 24) hours -= 24;
+    return { hours: Math.floor(hours), minutes: time.minutes };
+  };
+
   return {
-    sunrise: sunrise
-      ? { hours: sunrise.hours, minutes: sunrise.minutes }
-      : null,
-    sunset: sunset
-      ? { hours: sunset.hours, minutes: sunset.minutes }
-      : null,
+    sunrise: adjustForNYC(sunrise),
+    sunset: adjustForNYC(sunset),
   };
 }
 
