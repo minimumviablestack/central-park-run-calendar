@@ -3,8 +3,11 @@ import { Box, Button, CircularProgress, Paper, Stack, Typography, ToggleButton, 
 import WbSunnyIcon from '@mui/icons-material/WbSunny';
 import CheckroomIcon from '@mui/icons-material/Checkroom';
 import useSettings from '../hooks/useSettings';
+import AQIBadge from './AQIBadge';
+import { getSunriseSunset, formatTime } from '../utils/sunCalc';
 import { fToC, mphToKph } from '../utils/weatherUtils';
 
+const CENTRAL_PARK_COORDS = { lat: 40.7812, lon: -73.9665 };
 const DRESS_MY_RUN_URL = 'https://dressmyrun.com/place/40.80000,-73.97630';
 
 function WeatherWidget({ weather, weatherLoading }) {
@@ -16,6 +19,8 @@ function WeatherWidget({ weather, weatherLoading }) {
 
   const displayTemp = units === 'metric' ? fToC(weather?.temperature) : weather?.temperature;
   const displayWind = units === 'metric' ? mphToKph(weather?.windSpeed) : weather?.windSpeed;
+
+  const sunTimes = getSunriseSunset(CENTRAL_PARK_COORDS.lat, CENTRAL_PARK_COORDS.lon);
 
   return (
     <Paper elevation={0} sx={{ p: 2, borderRadius: 4, border: '1px solid', borderColor: 'divider' }}>
@@ -35,9 +40,21 @@ function WeatherWidget({ weather, weatherLoading }) {
                     {weather.shortForecast}
                   </Typography>
                 </Stack>
-                <Typography variant="body2" color="text.secondary">
-                  {displayWind} • {weather.windDirection}
-                </Typography>
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Typography variant="body2" color="text.secondary">
+                    {displayWind} • {weather.windDirection}
+                  </Typography>
+                  {sunTimes.sunrise && (
+                    <Typography variant="body2" color="text.secondary">
+                      🌅 {formatTime(sunTimes.sunrise)}
+                    </Typography>
+                  )}
+                  {sunTimes.sunset && (
+                    <Typography variant="body2" color="text.secondary">
+                      🌇 {formatTime(sunTimes.sunset)}
+                    </Typography>
+                  )}
+                </Stack>
               </>
             ) : (
               <Typography variant="caption">Weather Unavailable</Typography>
@@ -46,6 +63,7 @@ function WeatherWidget({ weather, weatherLoading }) {
         </Stack>
         
         <Stack direction="row" spacing={1} alignItems="center">
+          <AQIBadge />
           <ToggleButtonGroup
             value={units}
             exclusive

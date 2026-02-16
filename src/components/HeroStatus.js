@@ -1,9 +1,45 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Box, Button, Card, CardContent, Chip, Paper, Stack, Typography } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import ShareIcon from '@mui/icons-material/Share';
 import { parseWeatherData } from '../hooks/useWeather';
 
 function HeroStatus({ todayEvents, weather }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleShare = async () => {
+    const temp = weather?.temperature || '--';
+    const forecast = weather?.shortForecast || 'Unknown';
+    const hasEvents = todayEvents.length > 0;
+    
+    let text = '';
+    if (hasEvents) {
+      const eventNames = todayEvents.map(e => e.EVENT_NAME).join(', ');
+      text = `Heads up: ${eventNames} in Central Park today. Check routes before you go. centralpark.run`;
+    } else if (weather && (weather.temperature < 30 || weather.temperature > 90)) {
+      text = `Maybe skip Central Park today — ${temp}°F. centralpark.run`;
+    } else {
+      text = `It's a great day to run Central Park — ${temp}°F, ${forecast}. centralpark.run`;
+    }
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ text });
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.error('Share failed:', err);
+        }
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(text);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch (err) {
+        console.error('Copy failed:', err);
+      }
+    }
+  };
   if (todayEvents.length > 0) {
     return (
       <Card 
@@ -64,6 +100,16 @@ function HeroStatus({ todayEvents, weather }) {
               ))}
             </Stack>
           </Stack>
+          <Button
+            variant="contained"
+            color="inherit"
+            size="small"
+            startIcon={copied ? null : <ShareIcon />}
+            onClick={handleShare}
+            sx={{ mt: 1, bgcolor: 'rgba(255,255,255,0.5)', color: 'inherit', '&:hover': { bgcolor: 'rgba(255,255,255,0.7)' } }}
+          >
+            {copied ? 'Copied!' : 'Share'}
+          </Button>
         </CardContent>
       </Card>
     );
@@ -93,13 +139,23 @@ function HeroStatus({ todayEvents, weather }) {
              <Typography variant="subtitle1" fontWeight="500" sx={{ opacity: 0.9, lineHeight: 1.2 }}>
                {isBad ? 'Conditions are not ideal.' : isGreat ? 'It\'s a perfect day for a run!' : 'The park is open for you.'}
              </Typography>
-           </>
-         ) : (
-           <Typography variant="h6">Loading...</Typography>
-         )}
-       </CardContent>
-    </Card>
-  );
+            </>
+          ) : (
+            <Typography variant="h6">Loading...</Typography>
+          )}
+          <Button
+            variant="contained"
+            color="inherit"
+            size="small"
+            startIcon={copied ? null : <ShareIcon />}
+            onClick={handleShare}
+            sx={{ mt: 2, bgcolor: 'rgba(255,255,255,0.5)', color: 'inherit', '&:hover': { bgcolor: 'rgba(255,255,255,0.7)' } }}
+          >
+            {copied ? 'Copied!' : 'Share'}
+          </Button>
+        </CardContent>
+     </Card>
+   );
 }
 
 export default HeroStatus;
