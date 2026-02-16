@@ -1,134 +1,176 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Box, Paper, useTheme } from '@mui/material';
+import { MapContainer, TileLayer, Polyline, useMap } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
 
-const ParkMap = ({ highlightedSegments = [], affectedSegments = [], onSegmentClick }) => {
+const CENTRAL_PARK_BOUNDS = [
+  [40.7649, -73.9810],
+  [40.7968, -73.9490]
+];
+
+const FitBounds = ({ bounds }) => {
+  const map = useMap();
+  React.useEffect(() => {
+    map.fitBounds(bounds, { padding: [20, 20], maxZoom: 15 });
+  }, [map, bounds]);
+  return null;
+};
+
+const ParkMap = ({ highlightedSegments = [], affectedSegments = [], onSegmentClick, compact = false }) => {
   const theme = useTheme();
 
-  const getSegmentStyle = (id, type) => {
-    const isHighlighted = highlightedSegments.includes(id);
-    const isAffected = affectedSegments.includes(id);
-    
-    let stroke = '#e0e0e0';
-    let strokeWidth = type === 'drive' ? 8 : type === 'transverse' ? 6 : 5;
-    let dashArray = type === 'bridle' ? '8, 6' : 'none';
-
-    if (isHighlighted) {
-      stroke = theme.palette.primary.main;
-      strokeWidth += 2;
-    } else if (isAffected) {
-      stroke = theme.palette.warning.main;
-      dashArray = '10, 5';
-    }
-
-    return {
-      stroke,
-      strokeWidth,
-      strokeDasharray: dashArray,
-      transition: 'all 0.3s ease',
-      cursor: onSegmentClick ? 'pointer' : 'default',
-    };
-  };
-
-  const segments = [
-    {
+  const segments = useMemo(() => ({
+    drive_south: {
       id: 'drive_south',
       type: 'drive',
-      d: 'M 30 400 L 30 440 Q 30 480 100 480 Q 170 480 170 440 L 170 400',
-      label: 'Southern Drive, 1.44 miles'
+      coords: [
+        [40.7680, -73.9765],
+        [40.7700, -73.9745],
+        [40.7730, -73.9715],
+        [40.7755, -73.9690],
+        [40.7780, -73.9670]
+      ]
     },
-    {
+    drive_east_mid: {
       id: 'drive_east_mid',
       type: 'drive',
-      d: 'M 170 400 L 170 100',
-      label: 'East Drive, 1.75 miles'
+      coords: [
+        [40.7780, -73.9670],
+        [40.7810, -73.9610],
+        [40.7850, -73.9570],
+        [40.7890, -73.9540],
+        [40.7920, -73.9515]
+      ]
     },
-    {
+    drive_north: {
       id: 'drive_north',
       type: 'drive',
-      d: 'M 170 100 L 170 60 Q 170 20 100 20 Q 30 20 30 60 L 30 100',
-      label: 'Northern Drive, 1.16 miles'
+      coords: [
+        [40.7920, -73.9515],
+        [40.7945, -73.9510],
+        [40.7965, -73.9525],
+        [40.7955, -73.9560],
+        [40.7930, -73.9590]
+      ]
     },
-    {
+    drive_west_mid: {
       id: 'drive_west_mid',
       type: 'drive',
-      d: 'M 30 100 L 30 400',
-      label: 'West Drive, 1.68 miles'
+      coords: [
+        [40.7930, -73.9590],
+        [40.7890, -73.9650],
+        [40.7850, -73.9700],
+        [40.7810, -73.9750],
+        [40.7780, -73.9790]
+      ]
     },
-    {
+    transverse_72: {
       id: 'transverse_72',
       type: 'transverse',
-      d: 'M 30 300 L 170 300',
-      label: '72nd St Transverse, 0.27 miles'
+      coords: [
+        [40.7780, -73.9790],
+        [40.7780, -73.9670]
+      ]
     },
-    {
+    transverse_102: {
       id: 'transverse_102',
       type: 'transverse',
-      d: 'M 30 100 L 170 100',
-      label: '102nd St Transverse, 0.25 miles'
+      coords: [
+        [40.7930, -73.9590],
+        [40.7930, -73.9515]
+      ]
     },
-    {
+    reservoir: {
       id: 'reservoir',
       type: 'inner',
-      d: 'M 100 150 A 40 60 0 1 0 100 270 A 40 60 0 1 0 100 150',
-      label: 'Reservoir, 1.58 miles'
+      coords: [
+        [40.7795, -73.9620],
+        [40.7815, -73.9595],
+        [40.7845, -73.9580],
+        [40.7875, -73.9585],
+        [40.7895, -73.9605],
+        [40.7905, -73.9640],
+        [40.7895, -73.9675],
+        [40.7865, -73.9695],
+        [40.7825, -73.9690],
+        [40.7795, -73.9620]
+      ]
     },
-    {
+    bridle_path: {
       id: 'bridle_path',
       type: 'bridle',
-      d: 'M 100 140 A 50 75 0 1 0 100 280 A 50 75 0 1 0 100 140',
-      label: 'Bridle Path, 1.66 miles'
+      coords: [
+        [40.7770, -73.9635],
+        [40.7800, -73.9595],
+        [40.7840, -73.9570],
+        [40.7885, -73.9575],
+        [40.7915, -73.9600],
+        [40.7925, -73.9645],
+        [40.7910, -73.9690],
+        [40.7875, -73.9710],
+        [40.7825, -73.9705],
+        [40.7770, -73.9635]
+      ]
     }
-  ];
+  }), []);
+
+  const getSegmentStyle = (segmentId, type) => {
+    const isHighlighted = highlightedSegments.includes(segmentId);
+    const isAffected = affectedSegments.includes(segmentId);
+
+    if (isHighlighted) {
+      return { color: theme.palette.primary.main, weight: 6, opacity: 1 };
+    }
+    if (isAffected) {
+      return { color: theme.palette.warning.main, weight: 5, opacity: 0.8, dashArray: '10, 5' };
+    }
+    return { color: 'transparent', weight: 0, opacity: 0 };
+  };
+
+  const segmentList = Object.values(segments);
+
+  // Hide polylines for now - to be re-enabled once coordinates are fixed
+  const showRoutes = false;
 
   return (
     <Paper 
       elevation={0} 
       sx={{ 
-        p: 2, 
+        p: compact ? 1.5 : 2, 
         borderRadius: 4, 
         border: '1px solid', 
         borderColor: 'divider',
         bgcolor: 'background.paper'
       }}
     >
-      <Box sx={{ width: '100%', position: 'relative' }}>
-        <svg
-          viewBox="0 0 200 500"
-          style={{ width: '100%', height: 'auto', display: 'block' }}
-          xmlns="http://www.w3.org/2000/svg"
+      <Box sx={{ width: '100%', height: compact ? 320 : 450, borderRadius: 2, overflow: 'hidden' }}>
+        <MapContainer
+          center={[40.7812, -73.9665]}
+          zoom={14}
+          zoomControl={true}
+          dragging={true}
+          scrollWheelZoom={false}
+          doubleClickZoom={false}
+          boxZoom={false}
+          keyboard={false}
+          style={{ width: '100%', height: '100%' }}
         >
-          <g transform="translate(180, 30)">
-            <line x1="0" y1="0" x2="0" y2="-15" stroke={theme.palette.text.secondary} strokeWidth="2" markerEnd="url(#arrowhead)" />
-            <text x="0" y="10" textAnchor="middle" fontSize="10" fill={theme.palette.text.secondary} fontWeight="bold">N</text>
-            <defs>
-              <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
-                <polygon points="0 0, 10 3.5, 0 7" fill={theme.palette.text.secondary} />
-              </marker>
-            </defs>
-          </g>
-
-          {segments.map((seg) => (
-            <path
+          <FitBounds bounds={CENTRAL_PARK_BOUNDS} />
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          {showRoutes && segmentList.map((seg) => (
+            <Polyline
               key={seg.id}
-              d={seg.d}
-              fill="none"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              data-segment-id={seg.id}
-              aria-label={seg.label}
-              style={getSegmentStyle(seg.id, seg.type)}
-              onClick={() => onSegmentClick?.(seg.id)}
+              positions={seg.coords}
+              pathOptions={getSegmentStyle(seg.id, seg.type)}
+              eventHandlers={{
+                click: () => onSegmentClick?.(seg.id)
+              }}
             />
           ))}
-
-          <g fontSize="10" fill={theme.palette.text.secondary} style={{ pointerEvents: 'none' }}>
-            <text x="35" y="470" textAnchor="start">Columbus Circle</text>
-            <text x="100" y="40" textAnchor="middle">Harlem Hill</text>
-            <text x="100" y="215" textAnchor="middle" fontSize="9" fontWeight="bold">Reservoir</text>
-            <text x="100" y="295" textAnchor="middle" fontSize="8">72nd St</text>
-            <text x="100" y="95" textAnchor="middle" fontSize="8">102nd St</text>
-          </g>
-        </svg>
+        </MapContainer>
       </Box>
     </Paper>
   );

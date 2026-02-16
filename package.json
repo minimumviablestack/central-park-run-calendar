@@ -26,11 +26,13 @@
     "csv-writer": "^1.6.0",
     "dayjs": "^1.11.13",
     "dotenv": "^16.3.1",
+    "leaflet": "^1.9.4",
     "openai": "^4.14.0",
     "papaparse": "^5.5.2",
     "puppeteer": "^24.4.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.3.0",
     "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4"

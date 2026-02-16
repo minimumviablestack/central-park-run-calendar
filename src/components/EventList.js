@@ -135,19 +135,12 @@ function EventList() {
           </Grid>
         )}
 
-        {/* HERO SECTION: Today's Status */}
         <Grid item xs={12}>
           <HeroStatus todayEvents={todayEvents} weather={weather} />
         </Grid>
 
-        {/* Best Window */}
         <Grid item xs={12}>
           <BestWindowCard events={todayEvents} hourlyForecast={hourlyForecast} />
-        </Grid>
-
-        {/* Route Planner */}
-        <Grid item xs={12}>
-          <RoutePlanner todayEvents={todayEvents} />
         </Grid>
 
         {/* Weather Widget */}
@@ -204,6 +197,11 @@ function EventList() {
         {/* Week Strip */}
         <Grid item xs={12}>
           <WeekStrip events={upcomingEvents} hourlyForecast={hourlyForecast} />
+        </Grid>
+
+        {/* Route Planner */}
+        <Grid item xs={12}>
+          <RoutePlanner todayEvents={todayEvents} />
         </Grid>
 
         {/* Upcoming Events List */}
