@@ -214,16 +214,6 @@ function EventList() {
           </Paper>
         </Grid>
 
-        {/* Week Strip */}
-        <Grid item xs={12}>
-          <WeekStrip events={upcomingEvents} hourlyForecast={hourlyForecast} />
-        </Grid>
-
-        {/* Route Planner */}
-        <Grid item xs={12}>
-          <RoutePlanner todayEvents={todayEvents} />
-        </Grid>
-
         {/* Upcoming Events List */}
         <Grid item xs={12}>
           <Box sx={{ display: 'flex', alignItems: 'center', mt: 2, mb: 2 }}>
