@@ -67,8 +67,8 @@ function WeekStrip({ events, hourlyForecast }) {
   }, [hourlyForecast]);
 
   return (
-    <Box sx={{ overflowX: 'auto', pb: 1 }}>
-      <Grid container spacing={1} sx={{ minWidth: 600 }}>
+    <Box sx={{ overflowX: 'auto', pb: 1, mx: -2, px: 2 }}>
+      <Grid container spacing={1} sx={{ minWidth: 500, width: 'max-content' }}>
         {days.map((day) => {
           const dayStr = day.format('YYYY-MM-DD');
           const isToday = day.isSame(today, 'day');

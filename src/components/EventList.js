@@ -12,7 +12,11 @@ import {
   Container,
   Chip,
   Stack,
-  Button
+  Button,
+  Tabs,
+  Tab,
+  useTheme,
+  useMediaQuery
 } from '@mui/material';
 import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
@@ -39,7 +43,14 @@ function EventList() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [tabValue, setTabValue] = useState(0);
   const { weather, weatherLoading, alerts, hourlyForecast } = useWeather();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  const handleTabChange = (_, newValue) => {
+    setTabValue(newValue);
+  };
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -127,7 +138,16 @@ function EventList() {
         </Typography>
       </Box>
 
+      {isMobile && (
+        <Tabs value={tabValue} onChange={handleTabChange} variant="fullWidth" sx={{ mb: 2 }}>
+          <Tab label="Overview" />
+          <Tab label="Plan" />
+        </Tabs>
+      )}
+
       <Grid container spacing={2}>
+        {(!isMobile || tabValue === 0) && (
+          <React.Fragment>
         {/* Weather Alerts */}
         {alerts.length > 0 && (
           <Grid item xs={12}>
@@ -306,6 +326,19 @@ function EventList() {
             </Paper>
           )}
         </Grid>
+        </React.Fragment>
+        )}
+
+        {isMobile && tabValue === 1 && (
+          <>
+          <Grid item xs={12}>
+            <RoutePlanner todayEvents={todayEvents} />
+          </Grid>
+          <Grid item xs={12}>
+            <WeekStrip events={upcomingEvents} hourlyForecast={hourlyForecast} />
+          </Grid>
+        </>
+        )}
 
         {/* Footer */}
         <Grid item xs={12}>
