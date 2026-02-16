@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import EventList from './components/EventList';
 import About from './components/About';
+import InstallPrompt from './components/InstallPrompt';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 
@@ -64,6 +65,7 @@ function App() {
           <Route path="/" element={<EventList />} />
           <Route path="/about" element={<About />} />
         </Routes>
+        <InstallPrompt />
       </Router>
     </ThemeProvider>
   );

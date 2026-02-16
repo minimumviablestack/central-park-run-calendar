@@ -1,0 +1,155 @@
+{
+  "segments": [
+    {
+      "id": "drive_south",
+      "name": "Southern Drive",
+      "description": "59th St to 72nd St Transverse",
+      "distance_mi": 1.44,
+      "surface": "asphalt",
+      "elevation": "flat",
+      "landmarks": ["Columbus Circle", "Tavern on the Green", "Sheep Meadow"]
+    },
+    {
+      "id": "drive_east_mid",
+      "name": "East Drive",
+      "description": "72nd St to 102nd St",
+      "distance_mi": 1.75,
+      "surface": "asphalt",
+      "elevation": "rolling",
+      "landmarks": ["Cat Hill", "Engineers' Gate", "Metropolitan Museum"]
+    },
+    {
+      "id": "drive_north",
+      "name": "Northern Drive",
+      "description": "102nd St loop via Harlem Hill",
+      "distance_mi": 1.16,
+      "surface": "asphalt",
+      "elevation": "hilly",
+      "landmarks": ["Harlem Hill", "Harlem Meer", "Great Hill"]
+    },
+    {
+      "id": "drive_west_mid",
+      "name": "West Drive",
+      "description": "102nd St to 72nd St",
+      "distance_mi": 1.68,
+      "surface": "asphalt",
+      "elevation": "rolling",
+      "landmarks": ["Great Hill Descent", "North Meadow", "Summit Rock"]
+    },
+    {
+      "id": "transverse_72",
+      "name": "72nd St Transverse",
+      "description": "Connects East and West Drives at 72nd St",
+      "distance_mi": 0.27,
+      "surface": "asphalt",
+      "elevation": "flat",
+      "landmarks": ["Bethesda Terrace"]
+    },
+    {
+      "id": "transverse_102",
+      "name": "102nd St Transverse",
+      "description": "Connects East and West Drives at 102nd St",
+      "distance_mi": 0.25,
+      "surface": "asphalt",
+      "elevation": "flat",
+      "landmarks": ["Pool"]
+    },
+    {
+      "id": "reservoir",
+      "name": "Reservoir",
+      "description": "Jacqueline Kennedy Onassis Reservoir loop",
+      "distance_mi": 1.58,
+      "surface": "gravel",
+      "elevation": "flat",
+      "landmarks": ["JKO Reservoir", "Pump House"],
+      "standalone": true
+    },
+    {
+      "id": "bridle_path",
+      "name": "Bridle Path",
+      "description": "Soft dirt loop around the Reservoir",
+      "distance_mi": 1.66,
+      "surface": "dirt",
+      "elevation": "flat",
+      "landmarks": ["Bridle Path", "North Meadow"],
+      "standalone": true
+    }
+  ],
+  "loops": [
+    {
+      "id": "full_loop",
+      "name": "Full Loop",
+      "segments": ["drive_south", "drive_east_mid", "drive_north", "drive_west_mid"],
+      "distance_mi": 6.03,
+      "elevation": "hilly",
+      "description": "The complete Central Park Drive loop"
+    },
+    {
+      "id": "lower_loop",
+      "name": "Lower Loop",
+      "segments": ["drive_south", "drive_east_mid", "transverse_102", "drive_west_mid"],
+      "distance_mi": 5.14,
+      "elevation": "rolling",
+      "description": "Full loop minus Harlem Hill — south of 102nd St"
+    },
+    {
+      "id": "upper_loop",
+      "name": "Upper Loop",
+      "segments": ["transverse_72", "drive_east_mid", "drive_north", "drive_west_mid"],
+      "distance_mi": 4.86,
+      "elevation": "hilly",
+      "description": "North of 72nd St including Harlem Hill"
+    },
+    {
+      "id": "middle_loop",
+      "name": "Middle Loop",
+      "segments": ["transverse_72", "drive_east_mid", "transverse_102", "drive_west_mid"],
+      "distance_mi": 3.95,
+      "elevation": "rolling",
+      "description": "Between 72nd and 102nd St — avoids both ends"
+    },
+    {
+      "id": "southern_loop",
+      "name": "Southern Loop",
+      "segments": ["drive_south", "transverse_72"],
+      "distance_mi": 1.71,
+      "elevation": "flat",
+      "description": "Quick loop south of 72nd St"
+    },
+    {
+      "id": "northern_loop",
+      "name": "Northern Loop",
+      "segments": ["drive_north", "transverse_102"],
+      "distance_mi": 1.41,
+      "elevation": "hilly",
+      "description": "Short but steep — Harlem Hill loop"
+    },
+    {
+      "id": "reservoir_loop",
+      "name": "Reservoir",
+      "segments": ["reservoir"],
+      "distance_mi": 1.58,
+      "elevation": "flat",
+      "description": "Crushed gravel running path — counterclockwise only"
+    },
+    {
+      "id": "bridle_path_loop",
+      "name": "Bridle Path",
+      "segments": ["bridle_path"],
+      "distance_mi": 1.66,
+      "elevation": "flat",
+      "description": "Soft dirt trail around the Reservoir"
+    }
+  ],
+  "presets": [
+    { "label": "1.5 mi", "target_mi": 1.5, "tolerance_mi": 0.25 },
+    { "label": "3 mi", "target_mi": 3.0, "tolerance_mi": 0.5 },
+    { "label": "5K", "target_mi": 3.11, "tolerance_mi": 0.5 },
+    { "label": "5 mi", "target_mi": 5.0, "tolerance_mi": 0.5 },
+    { "label": "10K", "target_mi": 6.21, "tolerance_mi": 0.5 },
+    { "label": "10 mi", "target_mi": 10.0, "tolerance_mi": 0.75 },
+    { "label": "Half", "target_mi": 13.1, "tolerance_mi": 1.0 }
+  ],
+  "direction": "counterclockwise",
+  "notes": "All Park Drives are car-free since 2018. Inner lane for runners, middle for fast bikes, outer for slow bikes and authorized vehicles."
+}

@@ -11,11 +11,14 @@ import {
   Alert,
   Container,
   Chip,
-  Stack
+  Stack,
+  Button
 } from '@mui/material';
 import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import VideocamIcon from '@mui/icons-material/Videocam';
+import EventAvailableIcon from '@mui/icons-material/EventAvailable';
+import GoogleIcon from '@mui/icons-material/Google';
 import Papa from 'papaparse';
 import dayjs from 'dayjs';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
@@ -23,6 +26,12 @@ import useWeather from '../hooks/useWeather';
 import WeatherAlerts from './WeatherAlerts';
 import WeatherWidget from './WeatherWidget';
 import HeroStatus from './HeroStatus';
+import RoutePlanner from './RoutePlanner';
+import BestWindowCard from './BestWindowCard';
+import AQIBadge from './AQIBadge';
+import WeekStrip from './WeekStrip';
+import { getSunriseSunset, formatTime } from '../utils/sunCalc';
+import { downloadICS, getGoogleCalendarUrl } from '../utils/calendarExport';
 
 dayjs.extend(isSameOrAfter);
 
@@ -30,7 +39,7 @@ function EventList() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { weather, weatherLoading, alerts } = useWeather();
+  const { weather, weatherLoading, alerts, hourlyForecast } = useWeather();
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -131,6 +140,16 @@ function EventList() {
           <HeroStatus todayEvents={todayEvents} weather={weather} />
         </Grid>
 
+        {/* Best Window */}
+        <Grid item xs={12}>
+          <BestWindowCard events={todayEvents} hourlyForecast={hourlyForecast} />
+        </Grid>
+
+        {/* Route Planner */}
+        <Grid item xs={12}>
+          <RoutePlanner todayEvents={todayEvents} />
+        </Grid>
+
         {/* Weather Widget */}
         <Grid item xs={12}>
           <WeatherWidget weather={weather} weatherLoading={weatherLoading} />
@@ -180,6 +199,11 @@ function EventList() {
               />
             </Box>
           </Paper>
+        </Grid>
+
+        {/* Week Strip */}
+        <Grid item xs={12}>
+          <WeekStrip events={upcomingEvents} hourlyForecast={hourlyForecast} />
         </Grid>
 
         {/* Upcoming Events List */}
@@ -244,6 +268,29 @@ function EventList() {
                                   📍 {event.LOCATION}
                                 </Typography>
                               )}
+                            </Stack>
+                            <Stack direction="row" spacing={1} sx={{ mt: 0.5 }}>
+                              <Button
+                                size="small"
+                                variant="text"
+                                startIcon={<EventAvailableIcon sx={{ fontSize: 14 }} />}
+                                onClick={() => downloadICS(event)}
+                                sx={{ fontSize: '0.7rem', py: 0, minHeight: 24 }}
+                              >
+                                Add to Calendar
+                              </Button>
+                              <Button
+                                size="small"
+                                variant="text"
+                                startIcon={<GoogleIcon sx={{ fontSize: 14 }} />}
+                                component="a"
+                                href={getGoogleCalendarUrl(event)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                sx={{ fontSize: '0.7rem', py: 0, minHeight: 24 }}
+                              >
+                                Google
+                              </Button>
                             </Stack>
                           </Stack>
                         </Grid>

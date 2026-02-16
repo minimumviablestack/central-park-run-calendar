@@ -40,6 +40,7 @@ function useWeather() {
   const [weather, setWeather] = useState(null);
   const [weatherLoading, setWeatherLoading] = useState(true);
   const [alerts, setAlerts] = useState([]);
+  const [hourlyForecast, setHourlyForecast] = useState([]);
 
   useEffect(() => {
     const fetchWeather = async () => {
@@ -52,13 +53,15 @@ function useWeather() {
         const forecastResponse = await fetch(pointData.properties.forecastHourly);
         const forecastData = await forecastResponse.json();
         
-        // Find the next hour's forecast
+        const periods = forecastData.properties.periods || [];
+        setHourlyForecast(periods);
+        
         const now = new Date();
         const nextHour = now.getHours() + 1;
-        const nextHourForecast = forecastData.properties.periods.find(period => {
+        const nextHourForecast = periods.find(period => {
           const periodStart = new Date(period.startTime);
           return periodStart.getHours() >= nextHour && periodStart.getDate() === now.getDate();
-        }) || forecastData.properties.periods[1] || forecastData.properties.periods[0]; // fallback to next or first period
+        }) || periods[1] || periods[0];
         
         setWeather(nextHourForecast);
         setWeatherLoading(false);
@@ -98,7 +101,8 @@ function useWeather() {
   return {
     weather,
     weatherLoading,
-    alerts
+    alerts,
+    hourlyForecast
   };
 }
 
