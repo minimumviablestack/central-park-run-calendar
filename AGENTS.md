@@ -100,7 +100,7 @@ When generating code or suggesting changes, AI agents **must** follow these cons
 - **GitHub Pages**: Remember that the app is hosted at a subpath (if applicable). Use relative paths for assets.
 
 ### Context Awareness
-- **Deep Context**: Always refer to `GEMINI.md` for detailed technical history, specific implementation details, and project evolution.
+- **Deep Context**: Always refer to `CLAUDE.md` for technical context and project conventions.
 - **Environment**: Remember that `OPENAI_API_KEY` is required for the crawler but should **never** be committed to version control.
 
 ---
@@ -141,7 +141,7 @@ Understanding the directory structure is key to making correct changes:
 ## 8. Communication & Collaboration
 
 - **Atomic Commits**: When suggesting or making changes, aim for atomic commits that focus on a single feature or fix.
-- **Documentation**: Keep this `AGENTS.md` and `GEMINI.md` updated as the project evolves.
+- **Documentation**: Keep this `AGENTS.md` and `CLAUDE.md` updated as the project evolves.
 - **Transparency**: Explain the reasoning behind architectural choices, especially when they deviate from standard patterns.
 
 ---
