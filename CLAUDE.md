@@ -6,8 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 npm start                        # Dev server at localhost:3000
-npm test                         # Run Jest test suite
+npm test                         # Run Jest test suite (src/, non-watch)
 npm test -- src/path/to/file.js  # Run single test file
+npm run test:scripts             # Run node --test suite for scripts/lib/
 npm run crawl:smart              # Update events.csv using NYC Open Data API (recommended)
 npm run crawl                    # Update events.csv using OpenAI GPT-4o (requires OPENAI_API_KEY)
 npm run build                    # Production build (also copies data/ to build/)
