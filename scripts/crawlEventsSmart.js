@@ -9,6 +9,7 @@ require('dotenv').config();
 const puppeteer = require('puppeteer');
 const { isRouteImpacting } = require('./lib/routeImpact');
 const { deduplicateEvents } = require('./lib/events');
+const { transformFilmPermits } = require('./lib/filmPermits');
 
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -152,6 +153,25 @@ async function fetchNYCOpenDataEvents() {
     });
   } catch (error) {
     console.error('Error fetching from NYC Open Data API:', error.message);
+    return [];
+  }
+}
+
+async function fetchFilmPermits() {
+  console.log('Fetching film permits from NYC Open Data...');
+
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const response = await axios.get('https://data.cityofnewyork.us/resource/tad4-ftjs.json', {
+      params: {
+        $where: `startdatetime >= '${today}T00:00:00' AND upper(parkingheld) LIKE '%CENTRAL PARK%'`,
+        $order: 'startdatetime ASC',
+        $limit: 200
+      }
+    });
+    return transformFilmPermits(response.data);
+  } catch (error) {
+    console.error('Error fetching film permits:', error.message);
     return [];
   }
 }
@@ -634,6 +654,11 @@ async function main() {
   const openDataEvents = await fetchNYCOpenDataEvents();
   console.log(`Got ${openDataEvents.length} events from NYC Open Data API`);
   allEvents = [...allEvents, ...openDataEvents];
+
+  console.log('\n--- Film Permits (NYC Open Data) ---');
+  const filmEvents = await fetchFilmPermits();
+  console.log(`Got ${filmEvents.length} Central Park film permits`);
+  allEvents = [...allEvents, ...filmEvents];
 
   console.log('\n--- NYC Parks Website (Structured Parsing) ---');
   const nycParksEvents = await fetchNYCParksEventsStructured();
