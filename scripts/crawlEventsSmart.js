@@ -7,6 +7,8 @@ const csv = require('csv-parser');
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 require('dotenv').config();
 const puppeteer = require('puppeteer');
+const { isRouteImpacting } = require('./lib/routeImpact');
+const { deduplicateEvents } = require('./lib/events');
 
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -35,7 +37,8 @@ const csvWriter = createCsvWriter({
     { id: 'endTime', title: 'END_TIME' },
     { id: 'location', title: 'LOCATION' },
     { id: 'description', title: 'DESCRIPTION' },
-    { id: 'url', title: 'URL' }
+    { id: 'url', title: 'URL' },
+    { id: 'source', title: 'SOURCE' }
   ]
 });
 
@@ -99,7 +102,8 @@ async function readExistingEvents() {
           endTime: data.END_TIME,
           location: data.LOCATION,
           description: data.DESCRIPTION,
-          url: data.URL
+          url: data.URL,
+          source: data.SOURCE || 'manual'
         };
         events.push(event);
       })
@@ -112,21 +116,6 @@ async function readExistingEvents() {
         resolve([]);
       });
   });
-}
-
-function deduplicateEvents(events) {
-  const uniqueEvents = new Map();
-  
-  events.forEach(event => {
-    const key = `${event.name.toLowerCase().trim()}_${event.date}`;
-    
-    if (!uniqueEvents.has(key) || 
-        (uniqueEvents.get(key).description || '').length < (event.description || '').length) {
-      uniqueEvents.set(key, event);
-    }
-  });
-  
-  return Array.from(uniqueEvents.values());
 }
 
 async function fetchNYCOpenDataEvents() {
@@ -145,31 +134,11 @@ async function fetchNYCOpenDataEvents() {
     
     const allEvents = response.data;
     console.log(`Found ${allEvents.length} total events from NYC Open Data API`);
-    
-    const runningKeywords = ['run', 'race', 'marathon', 'triathlon', '5k', '10k', 'half'];
-    const largeEventKeywords = ['concert', 'festival', 'rally', 'parade'];
-    
-    const filteredEvents = allEvents.filter(event => {
-      const name = (event.event_name || '').toLowerCase();
-      const type = (event.event_type || '').toLowerCase();
-      const location = (event.event_location || '').toLowerCase();
-      
-      if (location.includes('lawn') || location.includes('playground')) {
-        return false;
-      }
-      
-      const isRunning = runningKeywords.some(kw => name.includes(kw) || type.includes(kw));
-      const isLargeEvent = largeEventKeywords.some(kw => name.includes(kw) || type.includes(kw));
-      
-      return isRunning || isLargeEvent;
-    });
-    
-    console.log(`Filtered to ${filteredEvents.length} running/large events`);
-    
-    return filteredEvents.map(event => {
+
+    return allEvents.map(event => {
       const startDate = new Date(event.start_date_time);
       const endDate = event.end_date_time ? new Date(event.end_date_time) : null;
-      
+
       return {
         name: event.event_name || 'Unnamed Event',
         date: startDate.toISOString().split('T')[0],
@@ -177,7 +146,8 @@ async function fetchNYCOpenDataEvents() {
         endTime: endDate ? endDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : '',
         location: event.event_location || 'Central Park',
         description: `${event.event_type || 'Event'} - ${event.event_agency || 'NYC Parks'}`,
-        url: `https://www.nycgovparks.org/parks/central-park/events`
+        url: `https://www.nycgovparks.org/parks/central-park/events`,
+        source: 'nyc-open-data'
       };
     });
   } catch (error) {
@@ -302,7 +272,8 @@ async function fetchNYCParksEventsStructured() {
         location: event.location || 'Central Park',
         description: event.category || (event.isFree ? 'Free Event' : 'Event'),
         url: event.eventUrl || 'https://www.nycgovparks.org/parks/central-park/events',
-        isRunning
+        isRunning,
+        source: 'nyc-parks'
       };
     });
     
@@ -457,7 +428,8 @@ async function fetchNYRREventsWithDetailPages() {
       endTime: '',
       location: 'Central Park, New York',
       description: 'NYRR Race',
-      url: e.url
+      url: e.url,
+      source: 'nyrr'
     }));
     
     console.log(`Found ${centralParkEvents.length} Central Park events from NYRR`);
@@ -659,38 +631,14 @@ async function main() {
   let allEvents = [];
   
   console.log('\n--- NYC Open Data API ---');
-  console.log('Skipping - API mostly contains lawn closures, not running events');
-  const openDataEvents = [];
+  const openDataEvents = await fetchNYCOpenDataEvents();
   console.log(`Got ${openDataEvents.length} events from NYC Open Data API`);
   allEvents = [...allEvents, ...openDataEvents];
-  
+
   console.log('\n--- NYC Parks Website (Structured Parsing) ---');
   const nycParksEvents = await fetchNYCParksEventsStructured();
-  
-  const runningKeywords = ['run', 'race', 'marathon', 'triathlon', '5k', '10k', 'half'];
-  const largeEventKeywords = ['concert', 'festival', 'rally', 'parade'];
-  
-  const filteredParksEvents = nycParksEvents.filter(event => {
-    const name = (event.name || '').toLowerCase();
-    const desc = (event.description || '').toLowerCase();
-    const location = (event.location || '').toLowerCase();
-    
-    if (location.includes('lawn') || location.includes('playground') || name.includes('lawn closure')) {
-      return false;
-    }
-    
-    if (name.includes('walk') && !name.includes('run')) {
-      return false;
-    }
-    
-    const isRunning = runningKeywords.some(kw => name.includes(kw) || desc.includes(kw));
-    const isLargeEvent = largeEventKeywords.some(kw => name.includes(kw) || desc.includes(kw));
-    
-    return isRunning || isLargeEvent;
-  });
-  
-  console.log(`Got ${filteredParksEvents.length} relevant events from NYC Parks (filtered from ${nycParksEvents.length} total)`);
-  allEvents = [...allEvents, ...filteredParksEvents];
+  console.log(`Got ${nycParksEvents.length} events from NYC Parks`);
+  allEvents = [...allEvents, ...nycParksEvents];
   
   console.log('\n--- NYRR (Detail Page Scraping) ---');
   const nyrrEvents = await fetchNYRREventsWithDetailPages();
@@ -709,11 +657,14 @@ async function main() {
     
     const filteredEvents = filterEvents(events, nycrunsUrl);
     console.log(`Filtered to ${filteredEvents.length} Central Park running events`);
-    
-    allEvents = [...allEvents, ...filteredEvents];
+
+    allEvents = [...allEvents, ...filteredEvents.map(e => ({ ...e, source: 'nycruns' }))];
   }
-  
-  allEvents = [...existingEvents, ...allEvents];
+
+  const impactingEvents = allEvents.filter(isRouteImpacting);
+  console.log(`Route-impacting events: ${impactingEvents.length} (of ${allEvents.length} crawled)`);
+
+  allEvents = [...existingEvents, ...impactingEvents];
   console.log(`\nTotal events after merging: ${allEvents.length}`);
   
   const uniqueEvents = deduplicateEvents(allEvents);

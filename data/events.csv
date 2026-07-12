@@ -1,37 +1,44 @@
-EVENT_NAME,DATE,START_TIME,END_TIME,LOCATION,DESCRIPTION,URL
-NYRR Joe Kleinerman 10K,2025-01-11,8:00 AM,,Central Park,Completed,https://www.nyrr.org/fullraceyearindex
-NYRR Fred Lebow Half Marathon,2025-01-26,8:00 AM,,Central Park,Completed,https://www.nyrr.org/fullraceyearindex
-NYRR Manhattan 10K,2025-02-02,8:00 AM,,Central Park,Completed,https://www.nyrr.org/fullraceyearindex
-March Classic Duathlon,2025-03-23,,,Central Park, Race,https://nytri.org/new-york-triathlon-3/2025-race-events/
-Health Walk at Run as One Presented by JPMorgan Chase 1.4M,2025-04-06,9:00 a.m.,11:00 a.m.,Central Park,Health Walk Event,https://www.nycgovparks.org/parks/central-park/events
-Run as One 4M Presented by JPMorgan Chase,2025-04-06,8:30 AM,,Central Park,Registration Closed,https://www.nyrr.org/fullraceyearindex
-RBC Race for the Kids 4M / RBC Race for the Kids 1M Family + Health Walk Presented by NYRR,2025-04-13,8:00 a.m.,11:00 a.m.,Central Park,Running Race Event,https://www.nycgovparks.org/parks/central-park/events
-Rising NYRR at the RBC Race for the Kids,2025-04-13,9:15 a.m.,10:15 a.m.,69th Street & Central Park West (in Central Park),Running Event,https://www.nycgovparks.org/parks/central-park/events
-NYRR Retro 4-Miler,2025-04-13,8:00 AM,,Central Park,Registration Closed,https://www.nyrr.org/fullraceyearindex
-1-Mile Health Walk at the NYRR Retro 4-Miler,2025-04-13,8:30 AM,,Central Park,Registration Closed,https://www.nyrr.org/fullraceyearindex
-Rising NYRR at the NYRR Retro 4-Miler - Stage 1,2025-04-13,9:15 AM,,Central Park,Registration Closed,https://www.nyrr.org/fullraceyearindex
-Maybelline Women's Half,2025-04-27,8:00 AM,,Central Park,Registration Closed,https://www.nyrr.org/fullraceyearindex
-Mastercard New York Mini 10K - Women's Race,2025-06-07,8:00 AM,,Central Park,Registration Closed,https://www.nyrr.org/fullraceyearindex
-Girls Run at the Mastercard New York Mini 10K - Stage 3,2025-06-07,8:50 AM,,Central Park,Available,https://www.nyrr.org/fullraceyearindex
-Girls Run at the Mastercard New York Mini 10K - Stage 2,2025-06-07,9:10 AM,,Central Park,Available,https://www.nyrr.org/fullraceyearindex
-Front Runners New York LGBT Pride Run 4M,2025-06-28,8:00 AM,,Central Park,Registration Closed,https://www.nyrr.org/fullraceyearindex
-Achilles Hope & Possibility 4M Presented by TD Bank,2025-06-29,8:15 AM,,Central Park,Registration Closed,https://www.nyrr.org/fullraceyearindex
-Achilles Hope & Possibility Kids Races with Rising NYRR - Stage 1,2025-06-29,9:45 AM,,Central Park,Available,https://www.nyrr.org/fullraceyearindex
-New York City Triathlon,2025-08-24,,,Central Park,Registration TBD,https://nytri.org/new-york-triathlon-3/2025-race-events/
-TCS New York City Marathon Kids Kickoff,2025-10-26,08:00,08:00,"Central Park, New York",Empower kids to cross any finish line by being part of the world's greatest marathon!,https://events.nyrr.org/rising-nyrr-kids-kickoff
-NYCRUNS Big Apple Half Marathon,2025-12-13,8:00 AM,,"Central Park | New York, NY",,https://nycruns.com/races
-NYCRUNS Frozen Penguin 5K,2026-01-04,9:00 AM,,"Central Park | New York, NY",,https://nycruns.com/races
-NYRR Gridiron 4M Presented by The FLAG Art Foundation,2026-02-08,09:00 AM,,"Central Park, New York",NYRR Race,https://www.nyrr.org/run/race-calendar
-NYCRUNS Central Park Half Marathon,2026-02-22,8:30 AM,,"Central Park | New York, NY",,https://nycruns.com/races
-"Rising NYRR at the NYRR Washington Heights Salsa, Blues, and Shamrocks 5K",2026-03-01,08:00 AM,,"Central Park, New York",NYRR Race,https://events.nyrr.org/rising-nyrr-at-the-nyrr-washington-heights-salsa-blues-and-shamrocks-5k
-"NYRR Washington Heights Salsa, Blues, and Shamrocks 5K",2026-03-01,09:00 AM,,"Central Park, New York",NYRR Race,https://events.nyrr.org/nyrr-washington-heights-salsa-blues-and-shamrocks-5k
-Run as One 4M Presented by JPMorgan Chase + 1.4 Mile Health Walk,2026-04-12,08:30 AM,,"Central Park, New York",NYRR Race,https://events.nyrr.org/run-as-one-4m-presented-by-jpmorgan-chase
-RBC Race for the Kids 4M Presented by NYRR + 1 Mile Family Walk,2026-04-19,08:00 AM,,"Central Park, New York",NYRR Race,https://events.nyrr.org/rbc-race-for-the-kids-4m-presented-by-nyrr
-Rising NYRR at the RBC Race for the Kids 4M,2026-04-19,09:15 AM,,"Central Park, New York",NYRR Race,https://events.nyrr.org/rnyrr-at-rbc-race-for-the-kids-4m
-Maybelline Women's Half,2026-04-26,08:00 AM,,"Central Park, New York",NYRR Race,https://events.nyrr.org/womens-half-marathon
-Rising NYRR at the NYRR Mindful 5K,2026-05-02,09:00 AM,,"Central Park, New York",NYRR Race,https://events.nyrr.org/rising-nyrr-at-the-mindful-5k
-Mastercard New York Mini 10K – Women’s Race,2026-06-06,08:00 AM,,"Central Park, New York",NYRR Race,https://events.nyrr.org/new-york-mini-10k
-Girls Run at the Mastercard New York Mini 10K,2026-06-06,08:50 AM,,"Central Park, New York",NYRR Race,https://events.nyrr.org/girls-run-at-the-mastercard-new-york-mini-10k
-Front Runners New York LGBTQ+ Pride Run 4M,2026-06-27,08:00 AM,,"Central Park, New York",NYRR Race,https://events.nyrr.org/front-runners-new-york-lgbt-pride-run-4m
-2026 TCS New York City Marathon,2026-11-01,08:00 AM,,"Central Park, New York",NYRR Race,https://events.nyrr.org/tcs-new-york-city-marathon
-NYCRUNS Big Apple Half Marathon,2026-12-13,08:00,,"Central Park | New York, NY",,https://nycruns.com/races
+EVENT_NAME,DATE,START_TIME,END_TIME,LOCATION,DESCRIPTION,URL,SOURCE
+NYRR Joe Kleinerman 10K,2025-01-11,8:00 AM,,Central Park,Completed,https://www.nyrr.org/fullraceyearindex,manual
+NYRR Fred Lebow Half Marathon,2025-01-26,8:00 AM,,Central Park,Completed,https://www.nyrr.org/fullraceyearindex,manual
+NYRR Manhattan 10K,2025-02-02,8:00 AM,,Central Park,Completed,https://www.nyrr.org/fullraceyearindex,manual
+March Classic Duathlon,2025-03-23,,,Central Park, Race,https://nytri.org/new-york-triathlon-3/2025-race-events/,manual
+Health Walk at Run as One Presented by JPMorgan Chase 1.4M,2025-04-06,9:00 a.m.,11:00 a.m.,Central Park,Health Walk Event,https://www.nycgovparks.org/parks/central-park/events,manual
+Run as One 4M Presented by JPMorgan Chase,2025-04-06,8:30 AM,,Central Park,Registration Closed,https://www.nyrr.org/fullraceyearindex,manual
+RBC Race for the Kids 4M / RBC Race for the Kids 1M Family + Health Walk Presented by NYRR,2025-04-13,8:00 a.m.,11:00 a.m.,Central Park,Running Race Event,https://www.nycgovparks.org/parks/central-park/events,manual
+Rising NYRR at the RBC Race for the Kids,2025-04-13,9:15 a.m.,10:15 a.m.,69th Street & Central Park West (in Central Park),Running Event,https://www.nycgovparks.org/parks/central-park/events,manual
+NYRR Retro 4-Miler,2025-04-13,8:00 AM,,Central Park,Registration Closed,https://www.nyrr.org/fullraceyearindex,manual
+1-Mile Health Walk at the NYRR Retro 4-Miler,2025-04-13,8:30 AM,,Central Park,Registration Closed,https://www.nyrr.org/fullraceyearindex,manual
+Rising NYRR at the NYRR Retro 4-Miler - Stage 1,2025-04-13,9:15 AM,,Central Park,Registration Closed,https://www.nyrr.org/fullraceyearindex,manual
+Maybelline Women's Half,2025-04-27,8:00 AM,,Central Park,Registration Closed,https://www.nyrr.org/fullraceyearindex,manual
+Mastercard New York Mini 10K - Women's Race,2025-06-07,8:00 AM,,Central Park,Registration Closed,https://www.nyrr.org/fullraceyearindex,manual
+Girls Run at the Mastercard New York Mini 10K - Stage 3,2025-06-07,8:50 AM,,Central Park,Available,https://www.nyrr.org/fullraceyearindex,manual
+Girls Run at the Mastercard New York Mini 10K - Stage 2,2025-06-07,9:10 AM,,Central Park,Available,https://www.nyrr.org/fullraceyearindex,manual
+Front Runners New York LGBT Pride Run 4M,2025-06-28,8:00 AM,,Central Park,Registration Closed,https://www.nyrr.org/fullraceyearindex,manual
+Achilles Hope & Possibility 4M Presented by TD Bank,2025-06-29,8:15 AM,,Central Park,Registration Closed,https://www.nyrr.org/fullraceyearindex,manual
+Achilles Hope & Possibility Kids Races with Rising NYRR - Stage 1,2025-06-29,9:45 AM,,Central Park,Available,https://www.nyrr.org/fullraceyearindex,manual
+New York City Triathlon,2025-08-24,,,Central Park,Registration TBD,https://nytri.org/new-york-triathlon-3/2025-race-events/,manual
+TCS New York City Marathon Kids Kickoff,2025-10-26,08:00,08:00,"Central Park, New York",Empower kids to cross any finish line by being part of the world's greatest marathon!,https://events.nyrr.org/rising-nyrr-kids-kickoff,manual
+NYCRUNS Big Apple Half Marathon,2025-12-13,8:00 AM,,"Central Park | New York, NY",,https://nycruns.com/races,manual
+NYCRUNS Frozen Penguin 5K,2026-01-04,9:00 AM,,"Central Park | New York, NY",,https://nycruns.com/races,manual
+NYRR Gridiron 4M Presented by The FLAG Art Foundation,2026-02-08,09:00 AM,,"Central Park, New York",NYRR Race,https://www.nyrr.org/run/race-calendar,manual
+NYCRUNS Central Park Half Marathon,2026-02-22,8:30 AM,,"Central Park | New York, NY",,https://nycruns.com/races,manual
+"Rising NYRR at the NYRR Washington Heights Salsa, Blues, and Shamrocks 5K",2026-03-01,08:00 AM,,"Central Park, New York",NYRR Race,https://events.nyrr.org/rising-nyrr-at-the-nyrr-washington-heights-salsa-blues-and-shamrocks-5k,manual
+"NYRR Washington Heights Salsa, Blues, and Shamrocks 5K",2026-03-01,09:00 AM,,"Central Park, New York",NYRR Race,https://events.nyrr.org/nyrr-washington-heights-salsa-blues-and-shamrocks-5k,manual
+Run as One 4M Presented by JPMorgan Chase + 1.4 Mile Health Walk,2026-04-12,08:30 AM,,"Central Park, New York",NYRR Race,https://events.nyrr.org/run-as-one-4m-presented-by-jpmorgan-chase,manual
+RBC Race for the Kids 4M Presented by NYRR + 1 Mile Family Walk,2026-04-19,08:00 AM,,"Central Park, New York",NYRR Race,https://events.nyrr.org/rbc-race-for-the-kids-4m-presented-by-nyrr,manual
+Rising NYRR at the RBC Race for the Kids 4M,2026-04-19,09:15 AM,,"Central Park, New York",NYRR Race,https://events.nyrr.org/rnyrr-at-rbc-race-for-the-kids-4m,manual
+Maybelline Women's Half,2026-04-26,08:00 AM,,"Central Park, New York",NYRR Race,https://events.nyrr.org/womens-half-marathon,manual
+Rising NYRR at the NYRR Mindful 5K,2026-05-02,09:00 AM,,"Central Park, New York",NYRR Race,https://events.nyrr.org/rising-nyrr-at-the-mindful-5k,manual
+Mastercard New York Mini 10K – Women’s Race,2026-06-06,08:00 AM,,"Central Park, New York",NYRR Race,https://events.nyrr.org/new-york-mini-10k,manual
+Girls Run at the Mastercard New York Mini 10K,2026-06-06,08:50 AM,,"Central Park, New York",NYRR Race,https://events.nyrr.org/girls-run-at-the-mastercard-new-york-mini-10k,manual
+Front Runners New York LGBTQ+ Pride Run 4M,2026-06-27,08:00 AM,,"Central Park, New York",NYRR Race,https://events.nyrr.org/front-runners-new-york-lgbt-pride-run-4m,manual
+TCS New York City Marathon Training Series 12M,2026-08-15,07:00 AM,,"Central Park, New York",NYRR Race,https://events.nyrr.org/tcs-new-york-city-marathon-training-series-12m,nyrr
+NYRR Grete's Great Gallop 10K,2026-08-22,07:30 AM,,"Central Park, New York",NYRR Race,https://events.nyrr.org/nyrr-grete-s-great-gallop-10k,nyrr
+Rising NYRR at the NYRR Grete's Great Gallop 10K,2026-08-22,09:30 AM,,"Central Park, New York",NYRR Race,https://events.nyrr.org/rising-nyrr-at-the-nyrr-grete-s-great-gallop-10k,nyrr
+TCS New York City Marathon Training Series 18M,2026-09-20,07:00 AM,,"Central Park, New York",NYRR Race,https://events.nyrr.org/tcs-new-york-city-marathon-training-series-18m,nyrr
+Abbott Dash to the Finish Line 5K,2026-10-31,08:45 AM,,"Central Park, New York",NYRR Race,https://events.nyrr.org/abbott-dash-to-the-finish-line-5k,nyrr
+2026 TCS New York City Marathon,2026-11-01,08:00 AM,,"Central Park, New York",NYRR Race,https://events.nyrr.org/tcs-new-york-city-marathon,manual
+Race to Deliver 4M to Benefit God's Love We Deliver,2026-11-22,08:00 AM,,"Central Park, New York",NYRR Race,https://events.nyrr.org/race-to-deliver-4m-to-benefit-god-s-love-we-deliver,nyrr
+Rising NYRR at the Race to Deliver 4M to Benefit God's Love We Deliver,2026-11-22,09:15 AM,,"Central Park, New York",NYRR Race,https://events.nyrr.org/rising-nyrr-at-the-race-to-deliver-4m-to-benefit-god-s-love-we-deliver,nyrr
+NYCRUNS Big Apple Half Marathon,2026-12-13,08:00,,"Central Park | New York, NY",,https://nycruns.com/races,manual
