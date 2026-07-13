@@ -2,7 +2,7 @@ name: Update Events and Deploy
 
 on:
   schedule:
-    - cron: '0 0 * * 1'  # Run weekly on Mondays at midnight
+    - cron: '0 8 * * *'  # Run daily at 08:00 UTC (~3-4am New York) so data is fresh before morning runs
   workflow_dispatch:      # Allow manual trigger
 
 jobs:
