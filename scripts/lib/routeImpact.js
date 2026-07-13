@@ -15,6 +15,13 @@ const EXCLUDE_KEYWORDS = [
 
 const segmentPatterns = locationSegments.mappings.flatMap((m) => m.patterns);
 
+// "Central Park West" is an avenue bordering the park, not the park itself.
+// Strip it before checking for a bare "central park" mention so street
+// addresses on that avenue aren't misclassified as inside the park.
+function mentionsCentralPark(loc) {
+  return loc.replace(/central park west/g, '').includes('central park');
+}
+
 function isRouteImpacting(event) {
   const name = (event.name || '').toLowerCase();
   const desc = (event.description || '').toLowerCase();
@@ -29,7 +36,7 @@ function isRouteImpacting(event) {
   if (loc.includes('lawn') || loc.includes('playground')) return false;
 
   const onSegment = segmentPatterns.some((p) => loc.includes(p));
-  const genericPark = loc === '' || loc.includes('central park');
+  const genericPark = loc === '' || mentionsCentralPark(loc);
 
   const isDriveEvent = DRIVE_EVENT_KEYWORDS.some((kw) => text.includes(kw));
   const isFilmShoot = text.includes('shooting permit') || text.includes('film shoot');

@@ -81,3 +81,16 @@ test('lawn closure is NOT route-impacting', () => {
     description: 'Lawn closure'
   }), false);
 });
+
+test('Central Park West avenue events are NOT route-impacting (avenue, not the park)', () => {
+  assert.equal(isRouteImpacting({
+    name: 'Columbus Ave Bike Rally',
+    location: 'Central Park West between 77th and 81st',
+    description: 'Community bike ride'
+  }), false);
+  assert.equal(isRouteImpacting({
+    name: 'Neighborhood Parade',
+    location: 'Central Park West at 79th Street',
+    description: 'Annual community parade'
+  }), false);
+});
