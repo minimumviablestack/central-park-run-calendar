@@ -37,7 +37,7 @@ The build step (`react-scripts build && cp -r data build/`) is critical — with
 
 ### CI/CD
 
-`.github/workflows/update-events.yml` runs daily (08:00 UTC): crawls events, builds, deploys to `gh-pages` branch. The `deploy-only.yml` workflow handles deploys without a data update.
+`.github/workflows/update-events.yml` runs weekly (Mondays 00:00 UTC): crawls events, builds, deploys to `gh-pages` branch. The `deploy-only.yml` workflow handles deploys without a data update.
 
 ## Code Conventions
 
