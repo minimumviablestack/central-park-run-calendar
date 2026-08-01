@@ -40,7 +40,7 @@
       "id": "transverse_72",
       "name": "72nd St Transverse",
       "description": "Connects East and West Drives at 72nd St",
-      "distance_mi": 0.27,
+      "distance_mi": 0.47,
       "surface": "asphalt",
       "elevation": "flat",
       "landmarks": ["Bethesda Terrace"]
@@ -96,7 +96,7 @@
       "id": "upper_loop",
       "name": "Upper Loop",
       "segments": ["transverse_72", "drive_east_mid", "drive_north", "drive_west_mid"],
-      "distance_mi": 4.86,
+      "distance_mi": 5.06,
       "elevation": "hilly",
       "description": "North of 72nd St including Harlem Hill"
     },
@@ -104,7 +104,7 @@
       "id": "middle_loop",
       "name": "Middle Loop",
       "segments": ["transverse_72", "drive_east_mid", "transverse_102", "drive_west_mid"],
-      "distance_mi": 3.95,
+      "distance_mi": 4.15,
       "elevation": "rolling",
       "description": "Between 72nd and 102nd St — avoids both ends"
     },
@@ -112,7 +112,7 @@
       "id": "southern_loop",
       "name": "Southern Loop",
       "segments": ["drive_south", "transverse_72"],
-      "distance_mi": 1.71,
+      "distance_mi": 1.91,
       "elevation": "flat",
       "description": "Quick loop south of 72nd St"
     },

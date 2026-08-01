@@ -335,14 +335,6 @@ async function main() {
   );
 
   // --- Self-check ------------------------------------------------------------
-  // Known reference-data discrepancy: segments.json declares transverse_72 at
-  // 0.27 mi, but the East Drive and West Drive junctions it connects are ~0.43 mi
-  // apart in a straight line, so no real path can be that short — the declared
-  // value is a source-data underestimate. The extracted geometry (the real ~0.47 mi
-  // cross-park road) is correct; we accept it here and flag it for a follow-up that
-  // corrects segments.json's transverse/loop distances (out of scope for extraction).
-  const KNOWN_DISCREPANCY = new Set(['transverse_72']);
-
   const report = [];
   for (const seg of segmentsData.segments) {
     const coords = output[seg.id];
@@ -352,11 +344,9 @@ async function main() {
     }
     const actualMi = pathLengthMiles(coords);
     const withinTolerance = Math.abs(actualMi - seg.distance_mi) <= TOLERANCE_MI;
-    let status = withinTolerance ? 'OK' : 'OUT OF TOLERANCE';
-    if (!withinTolerance && KNOWN_DISCREPANCY.has(seg.id)) status = 'OK (declared dist too low)';
     report.push({
       segmentId: seg.id,
-      status,
+      status: withinTolerance ? 'OK' : 'OUT OF TOLERANCE',
       actualMi: actualMi.toFixed(2),
       expectedMi: seg.distance_mi,
       points: coords.length,
