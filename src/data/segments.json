@@ -88,7 +88,7 @@
       "id": "lower_loop",
       "name": "Lower Loop",
       "segments": ["drive_south", "drive_east_mid", "transverse_102", "drive_west_mid"],
-      "distance_mi": 5.14,
+      "distance_mi": 5.12,
       "elevation": "rolling",
       "description": "Full loop minus Harlem Hill — south of 102nd St"
     },
