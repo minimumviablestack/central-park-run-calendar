@@ -1,6 +1,33 @@
 import segmentData from '../data/segments.json';
+import segmentGeometry from '../data/segmentGeometry.json';
+import { chainSegments } from './routeContinuity';
 
 const { segments, loops } = segmentData;
+
+// Largest allowed gap between two joined segments before a route is considered
+// to "fly through" (jump across the park). The worst gap inside a genuinely
+// connected route is ~0.09mi (a source-data junction imperfection where the
+// 72nd transverse meets the drives); every real fly-through — anything joining
+// the standalone reservoir/bridle loops to the drives, or two non-adjacent
+// loops — is >= 0.17mi, so 0.12mi cleanly separates the two.
+const MAX_SEAM_GAP_MI = 0.12;
+
+const comboMaxSeamGapMi = (combo) => {
+  const coordArrays = [];
+  for (const entry of combo) {
+    for (let rep = 0; rep < entry.repeat; rep++) {
+      for (const segId of entry.loop.segments) {
+        const coords = segmentGeometry[segId];
+        if (coords && coords.length) coordArrays.push(coords);
+      }
+    }
+  }
+  return chainSegments(coordArrays).maxSeamGapMi;
+};
+
+// A route is drawable (practical) when its pieces physically connect — no
+// fly-through jump at any seam.
+export const isRouteContinuous = (combo) => comboMaxSeamGapMi(combo) <= MAX_SEAM_GAP_MI;
 
 export const getSegment = (id) => segments.find(s => s.id === id);
 
@@ -119,7 +146,11 @@ export const suggestRoutes = (targetMi, toleranceMi = 0.5, affectedSegmentIds = 
     }
   }
 
-  const results = candidates.map(candidate => {
+  // Drop combinations whose segments don't physically connect — they would
+  // render (and export) with an impractical straight jump across the park.
+  const drawable = candidates.filter(candidate => isRouteContinuous(candidate.combo));
+
+  const results = drawable.map(candidate => {
     const segmentIds = collectSegmentIds(candidate.combo);
     const affectedCount = segmentIds.filter(id => affectedSegmentIds.includes(id)).length;
     const isAffected = affectedCount > 0;
