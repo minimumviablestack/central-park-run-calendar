@@ -16,6 +16,8 @@ import TerrainIcon from '@mui/icons-material/Terrain';
 import ParkMap from './ParkMap';
 import { suggestRoutes, getPresets } from '../utils/routeEngine';
 import { getAffectedSegments } from '../utils/eventRouteMapping';
+import segmentGeometry from '../data/segmentGeometry.json';
+import { buildRoutePath } from '../utils/routePath';
 
 const SURFACE_LABELS = {
   asphalt: 'Paved',
@@ -49,6 +51,11 @@ function RoutePlanner({ todayEvents = [] }) {
   }, [selectedPreset, affectedSegmentIds]);
 
   const activeRoute = routes[selectedRouteIdx] || null;
+
+  const routePath = useMemo(
+    () => (activeRoute ? buildRoutePath(activeRoute, segmentGeometry) : []),
+    [activeRoute]
+  );
 
   const handlePresetChange = (_, value) => {
     if (!value) {
@@ -116,10 +123,7 @@ function RoutePlanner({ todayEvents = [] }) {
           </ToggleButtonGroup>
         </Box>
 
-        <ParkMap
-          highlightedSegments={activeRoute?.segmentIds || []}
-          affectedSegments={affectedSegmentIds}
-        />
+        <ParkMap animatedPath={routePath} affectedSegments={affectedSegmentIds} />
 
         {routes.length > 0 && (
           <Stack spacing={1} sx={{ mt: 2 }}>

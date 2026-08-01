@@ -1,11 +1,14 @@
 import React, { useMemo } from 'react';
 import { Box, Paper, useTheme } from '@mui/material';
-import { MapContainer, TileLayer, Polyline, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Polyline, CircleMarker, Tooltip, Marker, useMap } from 'react-leaflet';
+import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import segmentGeometry from '../data/segmentGeometry.json';
+import { getMileMarkers, getDirectionArrows } from '../utils/geoMath';
 
 const CENTRAL_PARK_BOUNDS = [
   [40.7649, -73.9810],
-  [40.7968, -73.9490]
+  [40.7968, -73.9490],
 ];
 
 const FitBounds = ({ bounds }) => {
@@ -16,134 +19,51 @@ const FitBounds = ({ bounds }) => {
   return null;
 };
 
-const ParkMap = ({ highlightedSegments = [], affectedSegments = [], onSegmentClick, compact = false }) => {
+const arrowIcon = (bearing) =>
+  L.divIcon({
+    html: `<div style="transform: rotate(${bearing}deg); font-size: 16px; line-height: 16px; color: #2e7d32;">&#9650;</div>`,
+    className: 'route-direction-arrow',
+    iconSize: [16, 16],
+    iconAnchor: [8, 8],
+  });
+
+const startIcon = L.divIcon({
+  html: '<div style="width:14px;height:14px;border-radius:50%;background:#2e7d32;border:2px solid white;box-shadow:0 0 2px rgba(0,0,0,0.5);"></div>',
+  className: 'route-start-marker',
+  iconSize: [14, 14],
+  iconAnchor: [7, 7],
+});
+
+const ParkMap = ({ animatedPath = [], affectedSegments = [] }) => {
   const theme = useTheme();
 
-  const segments = useMemo(() => ({
-    drive_south: {
-      id: 'drive_south',
-      type: 'drive',
-      coords: [
-        [40.7680, -73.9765],
-        [40.7700, -73.9745],
-        [40.7730, -73.9715],
-        [40.7755, -73.9690],
-        [40.7780, -73.9670]
-      ]
-    },
-    drive_east_mid: {
-      id: 'drive_east_mid',
-      type: 'drive',
-      coords: [
-        [40.7780, -73.9670],
-        [40.7810, -73.9610],
-        [40.7850, -73.9570],
-        [40.7890, -73.9540],
-        [40.7920, -73.9515]
-      ]
-    },
-    drive_north: {
-      id: 'drive_north',
-      type: 'drive',
-      coords: [
-        [40.7920, -73.9515],
-        [40.7945, -73.9510],
-        [40.7965, -73.9525],
-        [40.7955, -73.9560],
-        [40.7930, -73.9590]
-      ]
-    },
-    drive_west_mid: {
-      id: 'drive_west_mid',
-      type: 'drive',
-      coords: [
-        [40.7930, -73.9590],
-        [40.7890, -73.9650],
-        [40.7850, -73.9700],
-        [40.7810, -73.9750],
-        [40.7780, -73.9790]
-      ]
-    },
-    transverse_72: {
-      id: 'transverse_72',
-      type: 'transverse',
-      coords: [
-        [40.7780, -73.9790],
-        [40.7780, -73.9670]
-      ]
-    },
-    transverse_102: {
-      id: 'transverse_102',
-      type: 'transverse',
-      coords: [
-        [40.7930, -73.9590],
-        [40.7930, -73.9515]
-      ]
-    },
-    reservoir: {
-      id: 'reservoir',
-      type: 'inner',
-      coords: [
-        [40.7795, -73.9620],
-        [40.7815, -73.9595],
-        [40.7845, -73.9580],
-        [40.7875, -73.9585],
-        [40.7895, -73.9605],
-        [40.7905, -73.9640],
-        [40.7895, -73.9675],
-        [40.7865, -73.9695],
-        [40.7825, -73.9690],
-        [40.7795, -73.9620]
-      ]
-    },
-    bridle_path: {
-      id: 'bridle_path',
-      type: 'bridle',
-      coords: [
-        [40.7770, -73.9635],
-        [40.7800, -73.9595],
-        [40.7840, -73.9570],
-        [40.7885, -73.9575],
-        [40.7915, -73.9600],
-        [40.7925, -73.9645],
-        [40.7910, -73.9690],
-        [40.7875, -73.9710],
-        [40.7825, -73.9705],
-        [40.7770, -73.9635]
-      ]
-    }
-  }), []);
+  const affectedCoords = useMemo(
+    () => affectedSegments.map((id) => segmentGeometry[id]).filter(Boolean),
+    [affectedSegments]
+  );
 
-  const getSegmentStyle = (segmentId, type) => {
-    const isHighlighted = highlightedSegments.includes(segmentId);
-    const isAffected = affectedSegments.includes(segmentId);
+  const mileMarkers = useMemo(
+    () => (animatedPath.length > 1 ? getMileMarkers(animatedPath) : []),
+    [animatedPath]
+  );
 
-    if (isHighlighted) {
-      return { color: theme.palette.primary.main, weight: 6, opacity: 1 };
-    }
-    if (isAffected) {
-      return { color: theme.palette.warning.main, weight: 5, opacity: 0.8, dashArray: '10, 5' };
-    }
-    return { color: 'transparent', weight: 0, opacity: 0 };
-  };
-
-  const segmentList = Object.values(segments);
-
-  // Hide polylines for now - to be re-enabled once coordinates are fixed
-  const showRoutes = false;
+  const arrows = useMemo(
+    () => (animatedPath.length > 1 ? getDirectionArrows(animatedPath) : []),
+    [animatedPath]
+  );
 
   return (
-    <Paper 
-      elevation={0} 
-      sx={{ 
-        p: compact ? 1.5 : 2, 
-        borderRadius: 4, 
-        border: '1px solid', 
+    <Paper
+      elevation={0}
+      sx={{
+        p: 2,
+        borderRadius: 4,
+        border: '1px solid',
         borderColor: 'divider',
-        bgcolor: 'background.paper'
+        bgcolor: 'background.paper',
       }}
     >
-      <Box sx={{ width: '100%', height: compact ? 320 : 450, borderRadius: 2, overflow: 'hidden' }}>
+      <Box sx={{ width: '100%', height: 450, borderRadius: 2, overflow: 'hidden' }}>
         <MapContainer
           center={[40.7812, -73.9665]}
           zoom={14}
@@ -157,18 +77,47 @@ const ParkMap = ({ highlightedSegments = [], affectedSegments = [], onSegmentCli
         >
           <FitBounds bounds={CENTRAL_PARK_BOUNDS} />
           <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+            url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
           />
-          {showRoutes && segmentList.map((seg) => (
+
+          {affectedCoords.map((coords, i) => (
             <Polyline
-              key={seg.id}
-              positions={seg.coords}
-              pathOptions={getSegmentStyle(seg.id, seg.type)}
-              eventHandlers={{
-                click: () => onSegmentClick?.(seg.id)
+              key={`affected-${i}`}
+              positions={coords}
+              pathOptions={{
+                color: theme.palette.warning.main,
+                weight: 5,
+                opacity: 0.8,
+                dashArray: '10, 5',
               }}
             />
+          ))}
+
+          {animatedPath.length > 1 && (
+            <Polyline
+              positions={animatedPath}
+              pathOptions={{ color: theme.palette.primary.main, weight: 6, opacity: 1 }}
+            />
+          )}
+
+          {animatedPath.length > 0 && <Marker position={animatedPath[0]} icon={startIcon} />}
+
+          {arrows.map((arrow, i) => (
+            <Marker key={`arrow-${i}`} position={arrow.position} icon={arrowIcon(arrow.bearing)} />
+          ))}
+
+          {mileMarkers.map((marker) => (
+            <CircleMarker
+              key={`mile-${marker.mile}`}
+              center={marker.position}
+              radius={5}
+              pathOptions={{ color: theme.palette.text.primary, fillColor: '#fff', fillOpacity: 1, weight: 2 }}
+            >
+              <Tooltip permanent direction="top" offset={[0, -6]}>
+                {marker.mile} mi
+              </Tooltip>
+            </CircleMarker>
           ))}
         </MapContainer>
       </Box>
