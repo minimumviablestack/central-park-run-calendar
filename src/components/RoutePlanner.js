@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import {
   Box,
+  Button,
   Card,
   CardContent,
   Chip,
@@ -13,11 +14,13 @@ import RouteIcon from '@mui/icons-material/Route';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import TerrainIcon from '@mui/icons-material/Terrain';
+import DownloadIcon from '@mui/icons-material/Download';
 import ParkMap from './ParkMap';
 import { suggestRoutes, getPresets } from '../utils/routeEngine';
 import { getAffectedSegments } from '../utils/eventRouteMapping';
 import segmentGeometry from '../data/segmentGeometry.json';
 import { buildRoutePath } from '../utils/routePath';
+import { downloadGpx } from '../utils/gpxExport';
 import useRouteAnimation from '../hooks/useRouteAnimation';
 
 const SURFACE_LABELS = {
@@ -192,23 +195,36 @@ function RoutePlanner({ todayEvents = [] }) {
                       </Stack>
                     </Box>
                     <Box sx={{ ml: 1, flexShrink: 0 }}>
-                      {route.isAffected ? (
-                        <Chip
-                          icon={<WarningAmberIcon sx={{ fontSize: 14 }} />}
-                          label="Event"
+                      <Stack spacing={0.5} alignItems="flex-end">
+                        <Button
                           size="small"
-                          color="warning"
-                          sx={{ height: 24, fontSize: '0.7rem', fontWeight: 600 }}
-                        />
-                      ) : (
-                        <Chip
-                          icon={<CheckCircleOutlineIcon sx={{ fontSize: 14 }} />}
-                          label="Clear"
-                          size="small"
-                          color="success"
-                          sx={{ height: 24, fontSize: '0.7rem', fontWeight: 600 }}
-                        />
-                      )}
+                          startIcon={<DownloadIcon sx={{ fontSize: 14 }} />}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            downloadGpx(route.name, buildRoutePath(route, segmentGeometry));
+                          }}
+                          sx={{ fontSize: '0.65rem', minWidth: 0, textTransform: 'none' }}
+                        >
+                          GPX
+                        </Button>
+                        {route.isAffected ? (
+                          <Chip
+                            icon={<WarningAmberIcon sx={{ fontSize: 14 }} />}
+                            label="Event"
+                            size="small"
+                            color="warning"
+                            sx={{ height: 24, fontSize: '0.7rem', fontWeight: 600 }}
+                          />
+                        ) : (
+                          <Chip
+                            icon={<CheckCircleOutlineIcon sx={{ fontSize: 14 }} />}
+                            label="Clear"
+                            size="small"
+                            color="success"
+                            sx={{ height: 24, fontSize: '0.7rem', fontWeight: 600 }}
+                          />
+                        )}
+                      </Stack>
                     </Box>
                   </Stack>
                 </CardContent>
