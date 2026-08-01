@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Box,
@@ -88,6 +88,19 @@ function EventList() {
     fetchEvents();
   }, []);
 
+  // Memoized so a parent re-render (e.g. weather resolving async) doesn't
+  // produce new array references that cascade into RoutePlanner's route
+  // computation and restart the in-flight route-draw animation.
+  const { upcomingEvents, todayEvents, futureEvents } = useMemo(() => {
+    const today = dayjs();
+    const upcoming = events.filter((event) => dayjs(event.DATE).isSameOrAfter(today, 'day'));
+    return {
+      upcomingEvents: upcoming,
+      todayEvents: upcoming.filter((event) => dayjs(event.DATE).isSame(today, 'day')),
+      futureEvents: upcoming.filter((event) => !dayjs(event.DATE).isSame(today, 'day')),
+    };
+  }, [events]);
+
   if (loading) {
     return (
       <Container maxWidth="md" sx={{ mt: 8, textAlign: 'center' }}>
@@ -108,20 +121,6 @@ function EventList() {
       </Container>
     );
   }
-
-  const today = dayjs();
-  
-  const upcomingEvents = events.filter(event => 
-    dayjs(event.DATE).isSameOrAfter(today, 'day')
-  );
-  
-  const todayEvents = upcomingEvents.filter(event => 
-    dayjs(event.DATE).isSame(today, 'day')
-  );
-  
-  const futureEvents = upcomingEvents.filter(event => 
-    !dayjs(event.DATE).isSame(today, 'day')
-  );
 
   return (
     <Container maxWidth="lg" sx={{ py: 2 }}>
