@@ -1,6 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import App from './App';
 
+jest.mock('./components/ParkMap', () => () => <div data-testid="mock-park-map" />);
+
 beforeEach(() => {
   global.fetch = jest.fn(() =>
     Promise.resolve({

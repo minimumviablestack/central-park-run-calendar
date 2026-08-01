@@ -124,7 +124,7 @@ function EventList() {
   );
 
   return (
-    <Container maxWidth="md" sx={{ py: 2 }}>
+    <Container maxWidth="lg" sx={{ py: 2 }}>
       {/* Header */}
       <Box sx={{ textAlign: 'center', mb: 3 }}>
         <Stack direction="row" alignItems="center" justifyContent="center" spacing={1} sx={{ mb: 0.5 }}>
@@ -147,7 +147,8 @@ function EventList() {
 
       <Grid container spacing={2}>
         {(!isMobile || tabValue === 0) && (
-          <React.Fragment>
+          <Grid item xs={12} md={7}>
+            <Grid container spacing={2}>
         {/* Weather Alerts */}
         {alerts.length > 0 && (
           <Grid item xs={12}>
@@ -316,18 +317,19 @@ function EventList() {
             </Paper>
           )}
         </Grid>
-        </React.Fragment>
+            </Grid>
+          </Grid>
         )}
 
-        {isMobile && tabValue === 1 && (
-          <>
-          <Grid item xs={12}>
-            <RoutePlanner todayEvents={todayEvents} />
+        {(!isMobile || tabValue === 1) && (
+          <Grid item xs={12} md={5}>
+            <Box sx={{ position: { md: 'sticky' }, top: { md: 16 } }}>
+              <Stack spacing={2}>
+                <RoutePlanner todayEvents={todayEvents} />
+                <WeekStrip events={upcomingEvents} hourlyForecast={hourlyForecast} />
+              </Stack>
+            </Box>
           </Grid>
-          <Grid item xs={12}>
-            <WeekStrip events={upcomingEvents} hourlyForecast={hourlyForecast} />
-          </Grid>
-        </>
         )}
 
         {/* Footer */}
