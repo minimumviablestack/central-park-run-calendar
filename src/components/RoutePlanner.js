@@ -18,6 +18,7 @@ import { suggestRoutes, getPresets } from '../utils/routeEngine';
 import { getAffectedSegments } from '../utils/eventRouteMapping';
 import segmentGeometry from '../data/segmentGeometry.json';
 import { buildRoutePath } from '../utils/routePath';
+import useRouteAnimation from '../hooks/useRouteAnimation';
 
 const SURFACE_LABELS = {
   asphalt: 'Paved',
@@ -56,6 +57,7 @@ function RoutePlanner({ todayEvents = [] }) {
     () => (activeRoute ? buildRoutePath(activeRoute, segmentGeometry) : []),
     [activeRoute]
   );
+  const { animatedPath } = useRouteAnimation(routePath);
 
   const handlePresetChange = (_, value) => {
     if (!value) {
@@ -123,7 +125,7 @@ function RoutePlanner({ todayEvents = [] }) {
           </ToggleButtonGroup>
         </Box>
 
-        <ParkMap animatedPath={routePath} affectedSegments={affectedSegmentIds} />
+        <ParkMap animatedPath={animatedPath} affectedSegments={affectedSegmentIds} />
 
         {routes.length > 0 && (
           <Stack spacing={1} sx={{ mt: 2 }}>
