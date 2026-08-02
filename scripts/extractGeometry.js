@@ -275,14 +275,28 @@ async function main() {
   healSmallGaps(driveGraph, 200);
   const driveMain = mainComponentSet(driveGraph);
   const snapDrive = (p) => nearestNode(driveGraph, p, driveMain);
-  output.drive_east_mid = dijkstra(driveGraph, snapDrive(A), snapDrive(B));
-  output.drive_west_mid = dijkstra(driveGraph, snapDrive(C), snapDrive(D));
+  const aKey = snapDrive(A);
+  const dKey = snapDrive(D);
+  output.drive_east_mid = dijkstra(driveGraph, aKey, snapDrive(B));
+  output.drive_west_mid = dijkstra(driveGraph, snapDrive(C), dKey);
   // No designated chord exists at 72nd, so A->D shortest wraps the southern cap.
-  output.drive_south = dijkstra(driveGraph, snapDrive(A), snapDrive(D));
+  output.drive_south = dijkstra(driveGraph, aKey, dKey);
+  // The exact drive-network nodes where the 72nd transverse must meet the loop.
+  const aDrive = driveGraph.coordOf.get(aKey);
+  const dDrive = driveGraph.coordOf.get(dKey);
+
+  // --- Full path network (footways included), reused for the northern arc.
+  //     Extract the 72nd transverse from it BEFORE banning any chords. --------
+  const allGraph = buildGraph(ways.map((w) => w.coords));
+
+  // 72nd transverse: the "72nd Street Transverse" way runs ~480ft east of East
+  // Drive toward Bethesda, so snapping its own endpoints leaves a gap at the
+  // drive junction. Route drive-node to drive-node instead so it joins the
+  // loop seamlessly (shortest path between the junctions is the transverse).
+  output.transverse_72 = dijkstra(allGraph, nearestNode(allGraph, aDrive), nearestNode(allGraph, dDrive));
 
   // --- Northern arc: the Harlem Hill top is only complete in the full path
   //     network (footways). Ban cross-park chords and force it over the apex. --
-  const allGraph = buildGraph(ways.map((w) => w.coords));
   removeWayEdges(allGraph, [
     ...t102Ways,
     ...named('97th Street Transverse'),
@@ -297,11 +311,7 @@ async function main() {
     northMain
   );
 
-  // --- Connectors ------------------------------------------------------------
-  const t72Graph = buildGraph(t72Ways);
-  healSmallGaps(t72Graph, 120);
-  output.transverse_72 = dijkstra(t72Graph, nearestNode(t72Graph, A), nearestNode(t72Graph, D));
-
+  // --- 102nd transverse (its endpoints already coincide with the drives) -----
   const t102Graph = buildGraph(t102Ways);
   healSmallGaps(t102Graph, 120);
   output.transverse_102 = dijkstra(t102Graph, nearestNode(t102Graph, B), nearestNode(t102Graph, C));
