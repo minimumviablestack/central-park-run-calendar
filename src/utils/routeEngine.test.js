@@ -46,3 +46,14 @@ test('standalone loops are still offered on their own', () => {
   const routes = suggestRoutes(1.58, 0.3, []);
   expect(routes.some((r) => r.name === 'Reservoir')).toBe(true);
 });
+
+test('half-marathon offers a two-lap-plus-extra route (Full Loop x2 + Southern Loop)', () => {
+  const routes = suggestRoutes(13.1, 1.0, []);
+  const twoLapPlus = routes.find((r) => {
+    const base = r.loops.find((l) => l.repeat >= 2);
+    return base && r.loops.length > 1;
+  });
+  expect(twoLapPlus).toBeDefined();
+  // The classic park half shape and it must be continuous (kept by the filter).
+  expect(isRouteContinuous(twoLapPlus.loops.map((l) => ({ loop: getLoop(l.id), repeat: l.repeat })))).toBe(true);
+});

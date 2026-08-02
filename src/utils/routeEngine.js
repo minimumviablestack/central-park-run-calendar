@@ -89,9 +89,14 @@ export const suggestRoutes = (targetMi, toleranceMi = 0.5, affectedSegmentIds = 
     }
   }
 
-  // 2) Two different loops combined (no repeats on individual loops for simplicity)
+  // 2) One loop run 1-2x plus a second, different loop. Allowing the first loop
+  //    to repeat captures the classic park pattern of two full laps plus a short
+  //    extra (e.g. a half-marathon: Full Loop x2 + Southern Loop). Ordered pairs
+  //    so either loop can be the repeated base; non-adjacent combinations are
+  //    dropped later by the continuity filter.
   for (let i = 0; i < loops.length; i++) {
-    for (let j = i + 1; j < loops.length; j++) {
+    for (let j = 0; j < loops.length; j++) {
+      if (i === j) continue;
       const loopA = loops[i];
       const loopB = loops[j];
 
@@ -102,13 +107,15 @@ export const suggestRoutes = (targetMi, toleranceMi = 0.5, affectedSegmentIds = 
         if (segA?.standalone && segB?.standalone) continue;
       }
 
-      const dist = loopA.distance_mi + loopB.distance_mi;
-      if (dist >= targetMi - toleranceMi && dist <= targetMi + toleranceMi) {
-        candidates.push({
-          combo: [{ loop: loopA, repeat: 1 }, { loop: loopB, repeat: 1 }],
-          distance_mi: Math.round(dist * 100) / 100,
-          complexity: 3,
-        });
+      for (let repeatA = 1; repeatA <= 2; repeatA++) {
+        const dist = loopA.distance_mi * repeatA + loopB.distance_mi;
+        if (dist >= targetMi - toleranceMi && dist <= targetMi + toleranceMi) {
+          candidates.push({
+            combo: [{ loop: loopA, repeat: repeatA }, { loop: loopB, repeat: 1 }],
+            distance_mi: Math.round(dist * 100) / 100,
+            complexity: repeatA > 1 ? 4 : 3,
+          });
+        }
       }
     }
   }
