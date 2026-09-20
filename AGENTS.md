@@ -26,11 +26,12 @@ The build step (`react-scripts build && cp -r data build/`) is critical — with
 ### App Structure
 
 - **`src/App.js`** — MUI theme (park green `#2e7d32`), React Router routes (`/` and `/about`)
-- **`src/components/EventList.js`** — Main page; owns all state, fetches CSV, orchestrates child components. Mobile shows two tabs (Overview / Plan); desktop shows full layout.
-- **`src/hooks/`** — `useWeather` (NWS API), `useAirQuality`, `useSettings` (localStorage)
-- **`src/utils/`** — Pure business logic: `routeEngine.js` (route suggestion), `eventRouteMapping.js` (event location → park segment), `bestWindow.js`, `sunCalc.js`, `weatherUtils.js`, `calendarExport.js`
-- **`src/data/segments.json`** — Park topology: 8 named segments + pre-computed loops (Full Loop 6.03mi, Lower Loop, Upper Loop, etc.)
-- **`scripts/`** — Node.js data-collection scripts (`crawlEventsSmart.js`, `extractGeometry.js`) and shared `lib/`
+- **`src/components/EventList.js`** — Main page; owns all state, fetches CSV, orchestrates child components. Mobile shows two tabs (Overview / Plan); desktop shows a persistent two-column layout (event list + sticky route planner).
+- **`src/components/ParkMap.js`** — Interactive map via `react-leaflet` + a Carto Positron basemap, rendering real road-following segment geometry (not hand-sketched approximations) with route-draw animation.
+- **`src/hooks/`** — `useWeather` (NWS API), `useAirQuality`, `useSettings` (localStorage), `useRouteAnimation` (animates the selected route's polyline)
+- **`src/utils/`** — Pure business logic: `routeEngine.js` (route suggestion), `eventRouteMapping.js` (event location → park segment), `bestWindow.js`, `sunCalc.js`, `weatherUtils.js`, `calendarExport.js`, `gpxExport.js` (GPX download per route), `geoMath.js`, `routePath.js`, `routeContinuity.js`
+- **`src/data/`** — `segments.json` (8 named segments + pre-computed loops, e.g. Full Loop 6.03mi), `segmentGeometry.json` (dense road-following polylines from `scripts/extractGeometry.js`, within ±0.1mi of declared segment distances), `locationSegments.json` (event location → segment matching data)
+- **`scripts/`** — Node.js data-collection scripts (`crawlEventsSmart.js`, `extractGeometry.js` — one-time Overpass API geometry extraction) and shared CommonJS `lib/` (`routeImpact.js` — route-impact event classification, `filmPermits.js`, `events.js` — dedup), each with `node --test` coverage
 
 ### Route Planner
 

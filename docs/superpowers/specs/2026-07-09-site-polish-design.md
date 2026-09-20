@@ -4,6 +4,16 @@
 **Status:** Approved
 **Scope:** Polish phase. Distribution/outreach is explicitly ON HOLD until this phase ships.
 
+> **Progress (2026-09-20)**, against the Build Order below:
+>
+> 1. Data scope + daily CI — **partial**: route-impact filter, `SOURCE` column, dedup shipped; cron switch to daily never applied (still weekly). See `docs/superpowers/plans/2026-07-10-data-scope-daily-ci.md`.
+> 2. SEO injection (`generateSeo.js`, JSON-LD, static pre-render, sitemap.xml) — **not started**. `public/robots.txt` exists; nothing else in §1 does.
+> 3. Interactive route map (geometry → rendering → desktop return → GPX) — **done**. See `docs/superpowers/plans/2026-07-13-interactive-route-map.md`.
+> 4. Alternatives card ("Park occupied? Run here instead") — **not started**.
+> 5. Subscribable `events.ics` feed — **not started** (per-event `.ics`/Google Calendar export from §4.2 of the old WORKPLAN exists; there's no build-time feed or `webcal://` subscribe button).
+> 6. What-to-wear card — **not started**.
+> 7. About page redesign + monetization slots — **partial**: Soar affiliate link and a crypto tip jar exist in `About.js`, but the tip flow still uses the jarring `alert()`-based MetaMask calls this section explicitly asked to replace with copy-to-clipboard + snackbar; no `support.json`-driven slot system or sponsor slot.
+
 ## Context & Goals
 
 - Site: single-page static React utility on GitHub Pages (stays static, stays free).

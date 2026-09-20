@@ -1,5 +1,7 @@
 # Interactive Route Map Implementation Plan
 
+> **Status (2026-09-20): Implemented.** Real segment geometry (`src/data/segmentGeometry.json`), `react-leaflet` + Carto Positron rendering, route-draw animation (`useRouteAnimation`), and the desktop two-column return all shipped — see `AGENTS.md`. GPX export (§3.4, originally optional) also shipped as `src/utils/gpxExport.js`. Checkboxes below were never checked off during execution (tracked separately via `.superpowers/sdd/`); kept as a historical record of the approach, not a live task list.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Replace the Route Planner's hand-sketched, non-rendering map polylines with real road-following geometry, animate route selection like the route is being drawn in, and bring the Route Planner back to desktop (it's currently mobile-only).

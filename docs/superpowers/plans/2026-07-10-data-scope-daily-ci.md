@@ -1,5 +1,7 @@
 # Data Scope + Daily CI Implementation Plan
 
+> **Status (2026-09-20): Mostly implemented, one gap.** Test harness repair, `SOURCE` column, dedup, and route-impact filtering (`scripts/lib/routeImpact.js`, `filmPermits.js`, `events.js`) all shipped. **Not done:** `.github/workflows/update-events.yml` is still on the weekly cron (`0 0 * * 1`) — the daily-refresh goal this plan is named after was never applied. Checkboxes below were never checked off during execution (tracked separately via `.superpowers/sdd/`); kept as a historical record, not a live task list.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Make the crawler capture only route-impacting Central Park events (races, parades, bike events, drive-closing gatherings, film shoots), tag every event with its SOURCE, and refresh data daily instead of weekly.
