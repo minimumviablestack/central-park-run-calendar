@@ -1,150 +1,88 @@
-# AI Agent Guidelines - Central Park Run Calendar
+# AGENTS.md
 
-This document provides comprehensive guidelines and context for AI coding agents working on the Central Park Run Calendar project. Following these instructions ensures consistency, maintainability, and alignment with the project's architectural goals.
+Guidance for AI coding agents (Claude Code, and others) working in this repository.
 
----
+## Commands
 
-## 1. Project Context
+```bash
+npm start                        # Dev server at localhost:3000
+npm test                         # Run Jest test suite (src/, non-watch)
+npm test -- src/path/to/file.js  # Run single test file
+npm run test:scripts             # Run node --test suite for scripts/lib/
+npm run crawl:smart              # Update events.csv using NYC Open Data API (recommended)
+npm run crawl                    # Update events.csv using OpenAI GPT-4o (requires OPENAI_API_KEY)
+npm run build                    # Production build (also copies data/ to build/)
+npm run deploy                   # Deploy build/ to GitHub Pages
+```
 
-The **Central Park Run Calendar** is a specialized web application designed to help runners in New York City navigate Central Park by providing a clear schedule of events, races, and gatherings that might impact their running routes.
+## Architecture
 
-### Core Technology Stack
-- **Frontend Framework**: React 19
-- **UI Library**: Material UI (MUI) v6
-- **Data Storage**: Static CSV file (`data/events.csv`)
-- **Data Collection**: Node.js crawler (`scripts/crawlEvents.js`) using Puppeteer and OpenAI GPT-4o
-- **Deployment**: GitHub Pages (Static Site Hosting)
+**Central constraint: this is a strictly static site** — no backend, no server, no database. Never suggest adding one; the project is intentionally static.
 
-### Key Architectural Principles
-- **Strictly Static**: This application has **no backend, no server, and no database**. All data is baked into the build or fetched as a static asset.
-- **Data-Driven**: The UI is a reflection of the `events.csv` file. Any changes to the data must happen through the crawler or manual CSV edits.
-- **Mobile First**: Runners often check the calendar on their phones; the UI must be highly responsive and touch-friendly.
+Data flow: `scripts/crawlEventsSmart.js` → `data/events.csv` → React app fetches CSV at runtime via `fetch('/data/events.csv')` + PapaParse → UI renders. Do not bypass this flow with live API calls for event data unless explicitly requested.
 
----
+The build step (`react-scripts build && cp -r data build/`) is critical — without the copy, production has no event data.
 
-## 2. Commands
+### App Structure
 
-Use the following commands for development, testing, and data management:
+- **`src/App.js`** — MUI theme (park green `#2e7d32`), React Router routes (`/` and `/about`)
+- **`src/components/EventList.js`** — Main page; owns all state, fetches CSV, orchestrates child components. Mobile shows two tabs (Overview / Plan); desktop shows full layout.
+- **`src/hooks/`** — `useWeather` (NWS API), `useAirQuality`, `useSettings` (localStorage)
+- **`src/utils/`** — Pure business logic: `routeEngine.js` (route suggestion), `eventRouteMapping.js` (event location → park segment), `bestWindow.js`, `sunCalc.js`, `weatherUtils.js`, `calendarExport.js`
+- **`src/data/segments.json`** — Park topology: 8 named segments + pre-computed loops (Full Loop 6.03mi, Lower Loop, Upper Loop, etc.)
+- **`scripts/`** — Node.js data-collection scripts (`crawlEventsSmart.js`, `extractGeometry.js`) and shared `lib/`
 
-| Command | Description |
-| :--- | :--- |
-| `npm start` | Starts the local development server (React Scripts). |
-| `npm test` | Runs the full test suite using Jest and React Testing Library. |
-| `npm test -- <path>` | Runs tests for a specific file (e.g., `npm test -- src/App.test.js`). |
-| `npm run crawl` | Executes the event crawler. Requires `OPENAI_API_KEY` in `.env`. |
-| `npm run build` | Creates a production build. **Note**: This also copies the `data/` directory. |
-| `npm run deploy` | Deploys the current `build/` directory to GitHub Pages. |
+### Route Planner
 
----
+`suggestRoutes(targetMi, toleranceMi, affectedSegmentIds)` in `routeEngine.js` returns ranked loop combinations. `eventRouteMapping.js` maps event locations to segment IDs so affected routes get warning badges.
 
-## 3. Code Style & Conventions
+### CI/CD
 
-Adhering to these styles ensures that AI-generated code blends seamlessly with the existing codebase.
+`.github/workflows/update-events.yml` runs weekly (Mondays 00:00 UTC): crawls events, builds, deploys to `gh-pages` branch. The `deploy-only.yml` workflow handles deploys without a data update.
 
-### Formatting & Syntax
-- **Indentation**: 2 spaces.
-- **Semicolons**: Always use semicolons.
-- **Strings**: Use single quotes (`'`) for JavaScript strings; use double quotes (`"`) for JSX attributes.
-- **Trailing Commas**: Use them where supported (ES6+).
+## Code Conventions
 
-### Naming Conventions
-- **React Components**: `PascalCase` (e.g., `EventCard.js`, `CalendarView.js`).
-- **Functions & Variables**: `camelCase` (e.g., `fetchEvents`, `isEventToday`).
-- **Constants**: `UPPER_SNAKE_CASE` (e.g., `MAX_EVENTS_DISPLAY`, `API_ENDPOINT`).
-- **Files**: Match the component name or use `kebab-case` for utility scripts.
+### Formatting & Style
+- **Styling**: MUI components + `sx` prop first; Emotion `styled` for complex cases
+- **Dates**: `dayjs` only (not native `Date`)
+- **Strings**: single quotes in JS, double quotes in JSX attributes
+- **Scripts (`scripts/`)**: CommonJS `require()`; app (`src/`): ES6 `import`/`export`
+- **Async**: `async/await` with `try/catch`
 
-### Import Organization
-Follow this specific order for imports:
-1. React and core React hooks.
-2. Third-party libraries (Material UI, `dayjs`, `papaparse`, etc.).
-3. Local components.
-4. Local hooks and utilities.
-5. Assets and styles (CSS/Images).
+### Naming
+- **React Components**: `PascalCase` (e.g., `EventCard.js`)
+- **Functions & Variables**: `camelCase`
+- **Constants**: `UPPER_SNAKE_CASE`
 
-### Scripting Style
-- **Node.js Scripts**: Use `require()` for module loading in `scripts/`.
-- **React Components**: Use ES6 `import`/`export` syntax.
-- **Async Code**: Prefer `async/await` over raw Promises. Always wrap in `try...catch` blocks.
+### Import Order
+1. React and core React hooks
+2. Third-party libraries (MUI, `dayjs`, `papaparse`, etc.)
+3. Local components
+4. Local hooks and utilities
+5. Assets and styles
 
-### Styling & UI
-- **MUI First**: Always prefer Material UI components over custom HTML/CSS.
-- **Custom Styles**: Use the MUI `sx` prop for small adjustments. For complex styling, use Emotion's `styled` utility.
-- **Theming**: Respect the project's MUI theme defined in `src/theme.js` (if applicable).
-
-### Date & Data Handling
-- **Dates**: Use `dayjs` for all date manipulations, formatting, and comparisons.
-- **CSV Parsing**: Use `papaparse` for reading and parsing the `events.csv` file in the frontend.
-
----
-
-## 4. AI Instructions (Critical)
-
-When generating code or suggesting changes, AI agents **must** follow these constraints:
-
-### Architecture Constraints
-- **No Backend**: Never suggest adding a backend server, Express API, or database (SQL/NoSQL). The project is intentionally a static site.
-- **Static Data Flow**: The flow is: `Crawler Script` -> `data/events.csv` -> `React App`. Do not attempt to bypass this flow or introduce live API calls for event data unless explicitly requested.
-
-### UI & Component Guidelines
-- **MUI Consistency**: Before creating a custom component, check the Material UI documentation. If a standard MUI component exists (e.g., `Card`, `List`, `Dialog`), use it.
-- **Accessibility**: Ensure all UI elements have proper ARIA labels and are keyboard-navigable. Use MUI's built-in accessibility features.
-- **Responsive Design**: Test all UI changes on mobile viewports. Use MUI's `Grid` and `Box` components for layout.
+### UI Guidelines
+- Prefer MUI components over custom HTML/CSS; check MUI docs before building a custom component.
+- Ensure ARIA labels and keyboard navigability.
+- Test UI changes on mobile viewports (this app is mobile-first — runners check it on their phones).
 
 ### Data Integrity
-- **CSV Format**: Ensure any manual or scripted changes to `data/events.csv` maintain the existing column structure and date formats.
-- **Crawler Safety**: When modifying `scripts/crawlEvents.js`, ensure that Puppeteer instances are properly closed and OpenAI API usage is optimized to avoid unnecessary costs.
-- **Validation**: Always validate data parsed from CSV before passing it to React components to prevent runtime crashes.
+- Manual or scripted edits to `data/events.csv` must preserve the existing column structure and date formats.
+- Validate CSV-parsed data before passing it to React components to prevent runtime crashes.
 
-### Build & Deployment
-- **Data Persistence**: Any modifications to the build process must ensure that the `data/` directory is correctly copied to the `build/` folder. The app will fail if the CSV is missing in production.
-- **GitHub Pages**: Remember that the app is hosted at a subpath (if applicable). Use relative paths for assets.
+### Error Handling & Logging
+- **Frontend**: Use MUI `Alert`/`Snackbar` for user-facing errors; avoid raw `alert()`. If the CSV fails to load, show a helpful message with a retry option.
+- **Scripts**: Use `console.error`; ensure crawler errors never leave `events.csv` corrupted.
 
-### Context Awareness
-- **Deep Context**: Always refer to `CLAUDE.md` for technical context and project conventions.
-- **Environment**: Remember that `OPENAI_API_KEY` is required for the crawler but should **never** be committed to version control.
+### Testing
+- Write unit tests for utility functions and hooks; use React Testing Library for component behavior.
+- Mock external dependencies (`papaparse`, `dayjs`) where needed for determinism.
+- Prioritize coverage on date parsing and event filtering — the app's core logic.
 
----
+## Environment
 
-## 5. Project Structure
+`.env` with `OPENAI_API_KEY` is only needed for `npm run crawl` (not `crawl:smart`). Never commit it.
 
-Understanding the directory structure is key to making correct changes:
+## Agent Working Files
 
-- `data/`: Contains `events.csv`, the primary data source.
-- `public/`: Static assets like `index.html`, icons, and manifest.
-- `scripts/`: Node.js utility scripts, including the event crawler.
-- `src/`: React source code.
-  - `components/`: Reusable UI components.
-  - `hooks/`: Custom React hooks.
-  - `utils/`: Helper functions and constants.
-  - `theme.js`: Material UI theme configuration.
-- `tests/`: Test files (if not colocated with components).
-
----
-
-## 6. Error Handling & Logging
-
-- **Frontend**: Use MUI `Alert` or `Snackbar` components to communicate errors to the user. Avoid raw `alert()` calls.
-- **Scripts**: Use `console.error` for logging errors in the crawler. Ensure that errors in the crawler do not result in a corrupted `events.csv`.
-- **Graceful Degradation**: If the CSV fails to load, show a helpful error message and a retry button if possible.
-
----
-
-## 7. Testing Guidelines
-
-- **Unit Tests**: Write unit tests for utility functions and hooks.
-- **Component Tests**: Use React Testing Library to test component behavior and rendering.
-- **Mocking**: Mock external dependencies like `papaparse` or `dayjs` when necessary to ensure tests are deterministic.
-- **Coverage**: Aim for high test coverage on critical business logic, especially date parsing and event filtering.
-
----
-
-## 8. Communication & Collaboration
-
-- **Atomic Commits**: When suggesting or making changes, aim for atomic commits that focus on a single feature or fix.
-- **Documentation**: Keep this `AGENTS.md` and `CLAUDE.md` updated as the project evolves.
-- **Transparency**: Explain the reasoning behind architectural choices, especially when they deviate from standard patterns.
-
----
-
-*Last Updated: February 2026*
-
+Keep scratch/intermediate files (exploration scripts, one-off notes, diffs) inside the repo under `.claude/tmp/` (gitignored) rather than under paths outside the project (e.g. `~/.claude/jobs/.../tmp`). Files outside the repo require extra permission grants and accumulate as stale entries in `.claude/settings.local.json`; files under `.claude/tmp/` stay local to this project and don't need parent-directory access.
