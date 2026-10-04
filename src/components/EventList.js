@@ -34,6 +34,7 @@ import RoutePlanner from './RoutePlanner';
 import BestWindowCard from './BestWindowCard';
 import WeekStrip from './WeekStrip';
 import { downloadICS, getGoogleCalendarUrl } from '../utils/calendarExport';
+import { injectEventsStructuredData } from '../utils/structuredData';
 
 dayjs.extend(isSameOrAfter);
 
@@ -98,6 +99,22 @@ function EventList() {
       futureEvents: upcoming.filter((event) => !dayjs(event.DATE).isSame(today, 'day')),
     };
   }, [events]);
+
+  useEffect(() => {
+    // Best-effort SEO enhancement — must never be able to take down the page.
+    try {
+      injectEventsStructuredData(upcomingEvents);
+    } catch (err) {
+      console.error('Failed to inject structured data:', err);
+    }
+    return () => {
+      try {
+        injectEventsStructuredData(null);
+      } catch (err) {
+        console.error('Failed to clear structured data:', err);
+      }
+    };
+  }, [upcomingEvents]);
 
   if (loading) {
     return (
