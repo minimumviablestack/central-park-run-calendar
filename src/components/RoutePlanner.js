@@ -86,7 +86,7 @@ function RoutePlanner({ todayEvents = [] }) {
       <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
         <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
           <RouteIcon color="primary" />
-          <Typography variant="subtitle1" fontWeight="bold">
+          <Typography variant="subtitle1" component="h2" fontWeight="bold">
             Plan Your Route
           </Typography>
         </Stack>
@@ -135,11 +135,23 @@ function RoutePlanner({ todayEvents = [] }) {
             <Typography variant="body2" color="text.secondary" fontWeight="500">
               {routes.length} route{routes.length !== 1 ? 's' : ''} found
             </Typography>
+            <Stack role="listbox" aria-label="Suggested routes" spacing={1}>
             {routes.map((route, idx) => (
               <Card
                 key={route.name}
                 elevation={0}
+                role="option"
+                tabIndex={0}
+                aria-selected={idx === selectedRouteIdx}
+                aria-label={`${route.name}, ${route.distance_mi} miles, ${route.isAffected ? 'affected by an event today' : 'clear of events'}`}
                 onClick={() => setSelectedRouteIdx(idx)}
+                onKeyDown={(e) => {
+                  if (e.target !== e.currentTarget) return;
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setSelectedRouteIdx(idx);
+                  }
+                }}
                 sx={{
                   cursor: 'pointer',
                   border: '2px solid',
@@ -149,6 +161,11 @@ function RoutePlanner({ todayEvents = [] }) {
                   transition: 'all 0.15s ease',
                   '&:hover': {
                     borderColor: 'primary.light',
+                  },
+                  '&:focus-visible': {
+                    outline: '2px solid',
+                    outlineColor: 'primary.main',
+                    outlineOffset: '2px',
                   },
                 }}
               >
@@ -161,8 +178,10 @@ function RoutePlanner({ todayEvents = [] }) {
                     <Box sx={{ flex: 1, minWidth: 0 }}>
                       <Typography
                         variant="subtitle2"
+                        component="span"
                         fontWeight="bold"
                         noWrap
+                        sx={{ display: 'block' }}
                       >
                         {route.name}
                       </Typography>
@@ -230,6 +249,7 @@ function RoutePlanner({ todayEvents = [] }) {
                 </CardContent>
               </Card>
             ))}
+            </Stack>
           </Stack>
         )}
 

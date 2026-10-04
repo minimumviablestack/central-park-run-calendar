@@ -33,10 +33,10 @@ function WeatherWidget({ weather, weatherLoading }) {
             ) : weather ? (
               <>
                 <Stack direction="row" alignItems="baseline" spacing={1}>
-                  <Typography variant="h4" fontWeight="300" sx={{ lineHeight: 1 }}>
+                  <Typography variant="h4" component="span" fontWeight="300" sx={{ lineHeight: 1 }}>
                     {displayTemp}°
                   </Typography>
-                  <Typography variant="subtitle1" fontWeight="bold">
+                  <Typography variant="subtitle1" component="span" fontWeight="bold">
                     {weather.shortForecast}
                   </Typography>
                 </Stack>
@@ -89,11 +89,12 @@ function WeatherWidget({ weather, weatherLoading }) {
           >
             What to wear
           </Button>
-          <Button 
+          <Button
             variant="outlined"
-            size="small" 
+            size="small"
             href={DRESS_MY_RUN_URL}
             target="_blank"
+            aria-label="What to wear"
             sx={{ display: { xs: 'flex', sm: 'none' }, minWidth: 0, p: 1 }}
           >
             <CheckroomIcon />

@@ -34,7 +34,7 @@ function WeatherAlerts({ alerts }) {
                   ) : (
                     <WarningAmberIcon sx={{ color: isSevere ? 'error.dark' : 'warning.dark' }} />
                   )}
-                  <Typography variant="subtitle1" fontWeight="800">
+                  <Typography variant="subtitle1" component="span" fontWeight="800">
                     {alert.event}
                   </Typography>
                 </Stack>

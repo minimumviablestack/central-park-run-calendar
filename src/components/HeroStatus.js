@@ -65,14 +65,14 @@ function HeroStatus({ todayEvents, weather }) {
                  size="small" 
                />
             </Box>
-            <Typography variant="h4" fontWeight="800" sx={{ lineHeight: 1 }}>
+            <Typography variant="h4" component="p" fontWeight="800" sx={{ lineHeight: 1 }}>
               Watch out for crowds.
             </Typography>
             
             <Stack spacing={2} sx={{ mt: 1 }}>
               {todayEvents.map((event, index) => (
                 <Paper key={index} elevation={0} sx={{ p: 2, bgcolor: 'rgba(255,255,255,0.7)', borderRadius: 2 }}>
-                   <Typography variant="subtitle1" fontWeight="bold" gutterBottom color="text.primary">
+                   <Typography variant="subtitle1" component="p" fontWeight="bold" gutterBottom color="text.primary">
                      {event.EVENT_NAME}
                    </Typography>
                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ mb: 1 }}>
@@ -133,15 +133,15 @@ function HeroStatus({ todayEvents, weather }) {
        <CardContent sx={{ p: { xs: 3, sm: 4 }, textAlign: 'center' }}>
          {weather ? (
            <>
-             <Typography variant="h3" fontWeight="900" sx={{ mb: 0.5, letterSpacing: '-1px' }}>
+             <Typography variant="h3" component="p" fontWeight="900" sx={{ mb: 0.5, letterSpacing: '-1px' }}>
                {isBad ? 'MAYBE' : 'YES!'}
              </Typography>
-             <Typography variant="subtitle1" fontWeight="500" sx={{ opacity: 0.9, lineHeight: 1.2 }}>
+             <Typography variant="subtitle1" component="p" fontWeight="500" sx={{ opacity: 0.9, lineHeight: 1.2 }}>
                {isBad ? 'Conditions are not ideal.' : isGreat ? 'It\'s a perfect day for a run!' : 'The park is open for you.'}
              </Typography>
             </>
           ) : (
-            <Typography variant="h6">Loading...</Typography>
+            <Typography variant="h6" component="p">Loading...</Typography>
           )}
           <Button
             variant="contained"

@@ -101,9 +101,9 @@ function EventList() {
 
   if (loading) {
     return (
-      <Container maxWidth="md" sx={{ mt: 8, textAlign: 'center' }}>
+      <Container component="main" maxWidth="md" sx={{ mt: 8, textAlign: 'center' }}>
         <CircularProgress size={60} thickness={4} />
-        <Typography variant="h6" color="text.secondary" sx={{ mt: 2 }}>
+        <Typography variant="h6" component="p" color="text.secondary" sx={{ mt: 2 }}>
           Checking the park...
         </Typography>
       </Container>
@@ -112,7 +112,7 @@ function EventList() {
 
   if (error) {
     return (
-      <Container maxWidth="md" sx={{ mt: 4 }}>
+      <Container component="main" maxWidth="md" sx={{ mt: 4 }}>
         <Alert severity="error" variant="filled" sx={{ borderRadius: 2 }}>
           {error}
         </Alert>
@@ -121,9 +121,9 @@ function EventList() {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 2 }}>
+    <Container component="main" maxWidth="lg" sx={{ py: 2 }}>
       {/* Header */}
-      <Box sx={{ textAlign: 'center', mb: 3 }}>
+      <Box component="header" sx={{ textAlign: 'center', mb: 3 }}>
         <Stack direction="row" alignItems="center" justifyContent="center" spacing={1} sx={{ mb: 0.5 }}>
           <DirectionsRunIcon color="primary" sx={{ fontSize: 32 }} />
           <Typography variant="h5" component="h1" fontWeight="800" color="primary.main" sx={{ letterSpacing: '-0.5px' }}>
@@ -172,7 +172,7 @@ function EventList() {
             <Box sx={{ p: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <Stack direction="row" alignItems="center" spacing={1}>
                 <VideocamIcon color="primary" />
-                <Typography variant="subtitle1" fontWeight="bold">Live Loop (72nd St)</Typography>
+                <Typography variant="subtitle1" component="span" fontWeight="bold">Live Loop (72nd St)</Typography>
               </Stack>
               <Typography 
                 variant="caption" 
@@ -216,7 +216,7 @@ function EventList() {
         <Grid item xs={12}>
           <Box sx={{ display: 'flex', alignItems: 'center', mt: 2, mb: 2 }}>
             <CalendarMonthIcon color="primary" sx={{ mr: 1 }} />
-            <Typography variant="h6" fontWeight="bold">
+            <Typography variant="h6" component="h2" fontWeight="bold">
               Upcoming Events
             </Typography>
           </Box>
@@ -245,7 +245,7 @@ function EventList() {
                       <Grid container alignItems="center" spacing={2}>
                         <Grid item xs={12} sm={3}>
                            <Box sx={{ textAlign: { xs: 'left', sm: 'center' } }}>
-                             <Typography variant="subtitle1" fontWeight="bold" color="primary">
+                             <Typography variant="subtitle1" component="span" fontWeight="bold" color="primary">
                                {eventDate.format('MMM D')}
                              </Typography>
                              <Typography variant="caption" color="text.secondary" fontWeight="bold">

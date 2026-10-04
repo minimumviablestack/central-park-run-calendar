@@ -12,10 +12,10 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 function About() {
   return (
-    <Paper elevation={3} sx={{ maxWidth: 800, margin: '20px auto', padding: 2 }}>
+    <Paper component="main" elevation={3} sx={{ maxWidth: 800, margin: '20px auto', padding: 2 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
         <DirectionsRunIcon sx={{ fontSize: 40, mr: 2, color: 'primary.main' }} />
-        <Typography variant="h5" gutterBottom sx={{ flex: 1 }}>
+        <Typography variant="h5" component="h1" gutterBottom sx={{ flex: 1 }}>
           About
         </Typography>
       </Box>
@@ -41,7 +41,7 @@ function About() {
         centralpark.run automatically fetch the latest events from various sources weekly and uses generative AI to parse and aggregate events that are happening in the Central Park. So you will know before you go whether you should be running in the park or avoid it that day, or even join the event!
       </Typography>
 
-      <Typography variant="h6" sx={{ mt: 3, mb: 1 }}>
+      <Typography variant="h6" component="h2" sx={{ mt: 3, mb: 1 }}>
         Support centralpark.run
       </Typography>
       
@@ -131,7 +131,7 @@ function About() {
       </Typography>
 
       <Box sx={{ mt: 4, p: 2, bgcolor: 'background.paper', borderRadius: 1, border: '1px solid', borderColor: 'divider' }}>
-        <Typography variant="h6" gutterBottom>
+        <Typography variant="h6" component="h2" gutterBottom>
           Disclaimer
         </Typography>
         <Typography variant="body2">

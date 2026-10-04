@@ -111,7 +111,7 @@ function WeekStrip({ events, hourlyForecast }) {
                   >
                     {day.format('D')}
                   </Typography>
-                  <Typography variant="h6" sx={{ my: 0.5 }}>
+                  <Typography variant="h6" component="span" sx={{ my: 0.5, display: 'block' }}>
                     {icon}
                   </Typography>
                   {forecast && (
