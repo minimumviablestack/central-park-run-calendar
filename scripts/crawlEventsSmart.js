@@ -532,84 +532,69 @@ async function extractEventsWithLLM(htmlContent, sourceUrl) {
     }
     
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-6-luna",
       messages: [
         {
-          role: "system", 
-          content: "You are an expert at extracting structured event data from text. Extract all events mentioned in the text and format them as JSON. Pay special attention to race events, dates, times, and locations. For NYRR events, make sure to look for location information in the additional details sections."
+          role: "system",
+          content: "You are an expert at extracting structured event data from text. Extract all events mentioned in the text. Pay special attention to race events, dates, times, and locations. For NYRR events, make sure to look for location information in the additional details sections."
         },
         {
           role: "user",
-          content: `Extract all running events and races from this text from ${sourceUrl}. Focus on event name, date, time, and location. Return ONLY a JSON array with objects containing these fields: name, date (YYYY-MM-DD format), startTime, endTime, location, description, category (if available), eventUrl (direct link to the event if available). 
+          content: `Extract all running events and races from this text from ${sourceUrl}. Focus on event name, date, time, and location.
           For NYRR races, look for race calendar entries, upcoming events, and scheduled runs. Pay special attention to location information which may be in the additional details sections.
-          For NYC Parks events, include the category field. 
+          For NYC Parks events, include the category field.
           For NYCRUNS races, use RACE START time as event start time.
           Here's the text: ${textContent}${learnMoreInfo}`
         }
       ],
-      temperature: 0.2,
-      max_tokens: 8000,
+      max_completion_tokens: 8000,
+      response_format: {
+        type: "json_schema",
+        json_schema: {
+          name: "extracted_events",
+          strict: true,
+          schema: {
+            type: "object",
+            properties: {
+              events: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    name: { type: "string" },
+                    date: { type: "string", description: "Event date in YYYY-MM-DD format" },
+                    startTime: { type: "string" },
+                    endTime: { type: ["string", "null"] },
+                    location: { type: "string" },
+                    description: { type: ["string", "null"] },
+                    category: { type: ["string", "null"] },
+                    eventUrl: { type: ["string", "null"], description: "Direct link to the event, if available" }
+                  },
+                  required: ["name", "date", "startTime", "endTime", "location", "description", "category", "eventUrl"],
+                  additionalProperties: false
+                }
+              }
+            },
+            required: ["events"],
+            additionalProperties: false
+          }
+        }
+      }
     });
 
-    const responseText = completion.choices[0].message.content;
-    console.log("Raw LLM response:", responseText);
-    
-    try {
-      try {
-        const events = JSON.parse(responseText);
-        if (Array.isArray(events)) {
-          console.log("Successfully parsed entire response as JSON array");
-          return events.map(event => ({
-            ...event, 
-            url: event.eventUrl || sourceUrl
-          }));
-        }
-      } catch (directParseError) {
-        console.log("Response is not a direct JSON array, trying to extract JSON...");
-      }
-      
-      const jsonMatch = responseText.match(/\[[\s\S]*\]/);
-      if (jsonMatch) {
-        console.log("Found JSON array in response using regex");
-        const events = JSON.parse(jsonMatch[0]);
-        return events.map(event => ({
-          ...event, 
-          url: event.eventUrl || sourceUrl
-        }));
-      } else {
-        console.error("No JSON array found in response, trying alternative parsing");
-        
-        const objectMatches = responseText.match(/\{[^{}]*\}/g);
-        if (objectMatches && objectMatches.length > 0) {
-          console.log(`Found ${objectMatches.length} potential JSON objects`);
-          
-          const events = [];
-          for (const match of objectMatches) {
-            try {
-              const event = JSON.parse(match);
-              events.push(event);
-            } catch (objParseError) {
-              console.log(`Failed to parse object: ${match}`);
-            }
-          }
-          
-          if (events.length > 0) {
-            console.log(`Successfully parsed ${events.length} events from response`);
-            return events.map(event => ({
-              ...event, 
-              url: event.eventUrl || sourceUrl
-            }));
-          }
-        }
-        
-        console.error("No valid JSON found in response");
-        return [];
-      }
-    } catch (parseError) {
-      console.error("Error parsing JSON from LLM response:", parseError);
-      console.log("Raw response:", responseText);
+    const message = completion.choices[0].message;
+    if (message.refusal) {
+      console.error("Model refused to extract events:", message.refusal);
       return [];
     }
+
+    console.log("Raw LLM response:", message.content);
+    const { events } = JSON.parse(message.content);
+    console.log(`Parsed ${events.length} events from structured output`);
+    return events.map(event => ({
+      ...event,
+      url: event.eventUrl || sourceUrl
+    }));
   } catch (error) {
     console.error("Error calling OpenAI API:", error);
     return [];
