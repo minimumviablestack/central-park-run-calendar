@@ -32,9 +32,7 @@ import WeatherWidget from './WeatherWidget';
 import HeroStatus from './HeroStatus';
 import RoutePlanner from './RoutePlanner';
 import BestWindowCard from './BestWindowCard';
-import AQIBadge from './AQIBadge';
 import WeekStrip from './WeekStrip';
-import { getSunriseSunset, formatTime } from '../utils/sunCalc';
 import { downloadICS, getGoogleCalendarUrl } from '../utils/calendarExport';
 
 dayjs.extend(isSameOrAfter);

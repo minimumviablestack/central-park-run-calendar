@@ -9,8 +9,7 @@ npm start                        # Dev server at localhost:3000
 npm test                         # Run Jest test suite (src/, non-watch)
 npm test -- src/path/to/file.js  # Run single test file
 npm run test:scripts             # Run node --test suite for scripts/lib/
-npm run crawl:smart              # Update events.csv using NYC Open Data API (recommended)
-npm run crawl                    # Update events.csv using OpenAI GPT-4o (requires OPENAI_API_KEY)
+npm run crawl:smart              # Update events.csv using NYC Open Data API + structured HTML parsing
 npm run build                    # Production build (also copies data/ to build/)
 npm run deploy                   # Deploy build/ to GitHub Pages
 ```
@@ -82,7 +81,7 @@ The build step (`react-scripts build && cp -r data build/`) is critical — with
 
 ## Environment
 
-`.env` with `OPENAI_API_KEY` is only needed for `npm run crawl` (not `crawl:smart`). Never commit it.
+`.env` with `OPENAI_API_KEY` is optional: `crawl:smart` gets most events from the NYC Open Data API, structured HTML parsing, and NYRR detail-page scraping, and only falls back to the LLM for NYCRUNS. Without the key, that one source is skipped rather than failing. Never commit it.
 
 ## Agent Working Files
 

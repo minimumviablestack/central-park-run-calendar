@@ -35,7 +35,7 @@ cd central-park-run-calendar
 npm install
 ```
 
-3. (Optional) Set up environment variables for the crawler:
+3. (Optional) Set up environment variables for the crawler's LLM fallback (NYCRUNS source only):
 ```
 cp .env.example .env
 # Edit .env and add your OPENAI_API_KEY
@@ -50,18 +50,11 @@ npm start
 
 ## Event Crawler
 
-The project includes two crawler scripts:
-
-| Command | Description |
-|---------|-------------|
-| `npm run crawl` | Original crawler using LLM extraction |
-| `npm run crawl:smart` | Smart crawler with NYC Open Data API + structured HTML parsing |
-
-The smart crawler (`crawl:smart`) is recommended as it:
+`npm run crawl:smart` updates `data/events.csv`:
 - Uses NYC Open Data API for official event data
 - Parses structured HTML using microformats (no LLM needed for NYC Parks)
 - Supports pagination (gets all 9+ pages of events)
-- Falls back to LLM only for NYRR and NYCRUNS
+- NYRR events are scraped directly (detail-page scraping, no LLM); NYCRUNS falls back to LLM extraction (requires `OPENAI_API_KEY`; skipped if unset)
 
 ## Deployment
 
