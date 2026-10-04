@@ -10,7 +10,7 @@ npm test                         # Run Jest test suite (src/, non-watch)
 npm test -- src/path/to/file.js  # Run single test file
 npm run test:scripts             # Run node --test suite for scripts/lib/
 npm run crawl:smart              # Update events.csv using NYC Open Data API + structured HTML parsing
-npm run build                    # Production build (also copies data/ to build/)
+npm run build                    # Production build (also copies data/ to build/, then prerenders / and /about)
 npm run deploy                   # Deploy build/ to GitHub Pages
 ```
 
@@ -20,7 +20,7 @@ npm run deploy                   # Deploy build/ to GitHub Pages
 
 Data flow: `scripts/crawlEventsSmart.js` → `data/events.csv` → React app fetches CSV at runtime via `fetch('/data/events.csv')` + PapaParse → UI renders. Do not bypass this flow with live API calls for event data unless explicitly requested.
 
-The build step (`react-scripts build && cp -r data build/`) is critical — without the copy, production has no event data.
+The build step (`react-scripts build && cp -r data build/ && node scripts/prerender.js`) is critical — without the copy, production has no event data; without the prerender step, crawlers and AI assistants that don't execute JavaScript see an empty shell (`<div id="root">`), since this is a client-rendered SPA. `scripts/prerender.js` spins up a throwaway local static server, uses Puppeteer to render `/` and `/about` (waiting for the CSV fetch to resolve), and overwrites `build/index.html` / writes `build/about/index.html` with the fully-rendered HTML. This is a snapshot, not true SSR or hydration — the client bundle still does a full CSR remount on load.
 
 ### App Structure
 
@@ -30,7 +30,7 @@ The build step (`react-scripts build && cp -r data build/`) is critical — with
 - **`src/hooks/`** — `useWeather` (NWS API), `useAirQuality`, `useSettings` (localStorage), `useRouteAnimation` (animates the selected route's polyline)
 - **`src/utils/`** — Pure business logic: `routeEngine.js` (route suggestion), `eventRouteMapping.js` (event location → park segment), `bestWindow.js`, `sunCalc.js`, `weatherUtils.js`, `calendarExport.js`, `gpxExport.js` (GPX download per route), `geoMath.js`, `routePath.js`, `routeContinuity.js`
 - **`src/data/`** — `segments.json` (8 named segments + pre-computed loops, e.g. Full Loop 6.03mi), `segmentGeometry.json` (dense road-following polylines from `scripts/extractGeometry.js`, within ±0.1mi of declared segment distances), `locationSegments.json` (event location → segment matching data)
-- **`scripts/`** — Node.js data-collection scripts (`crawlEventsSmart.js`, `extractGeometry.js` — one-time Overpass API geometry extraction) and shared CommonJS `lib/` (`routeImpact.js` — route-impact event classification, `filmPermits.js`, `events.js` — dedup), each with `node --test` coverage
+- **`scripts/`** — Node.js data-collection scripts (`crawlEventsSmart.js`, `extractGeometry.js` — one-time Overpass API geometry extraction, `prerender.js` — build-time crawler/SEO prerendering, run from `npm run build`) and shared CommonJS `lib/` (`routeImpact.js` — route-impact event classification, `filmPermits.js`, `events.js` — dedup), each with `node --test` coverage
 
 ### Route Planner
 

@@ -7,7 +7,7 @@
     "test": "react-scripts test --watchAll=false",
     "test:scripts": "node --test 'scripts/lib/**/*.test.js'",
     "crawl:smart": "node scripts/crawlEventsSmart.js",
-    "build": "CI=false react-scripts build && cp -r data build/",
+    "build": "CI=false react-scripts build && cp -r data build/ && node scripts/prerender.js",
     "deploy": "gh-pages -d build"
   },
   "dependencies": {
