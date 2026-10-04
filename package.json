@@ -13,6 +13,7 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
+    "@maplibre/maplibre-gl-leaflet": "^0.1.4",
     "@mui/icons-material": "^6.4.6",
     "@mui/material": "^6.4.6",
     "@testing-library/dom": "^10.4.0",
@@ -26,6 +27,7 @@
     "dayjs": "^1.11.13",
     "dotenv": "^16.3.1",
     "leaflet": "^1.9.4",
+    "maplibre-gl": "^5.24.0",
     "openai": "^4.14.0",
     "papaparse": "^5.5.2",
     "puppeteer": "^24.4.0",

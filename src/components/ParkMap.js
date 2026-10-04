@@ -1,8 +1,10 @@
 import React, { useMemo } from 'react';
 import { Box, Paper, useTheme } from '@mui/material';
-import { MapContainer, TileLayer, Polyline, CircleMarker, Tooltip, Marker, useMap } from 'react-leaflet';
+import { MapContainer, Polyline, CircleMarker, Tooltip, Marker, useMap } from 'react-leaflet';
 import L from 'leaflet';
+import { maplibreGL } from '@maplibre/maplibre-gl-leaflet';
 import 'leaflet/dist/leaflet.css';
+import 'maplibre-gl/dist/maplibre-gl.css';
 import segmentGeometry from '../data/segmentGeometry.json';
 import { getMileMarkers, getDirectionArrows } from '../utils/geoMath';
 
@@ -11,11 +13,24 @@ const CENTRAL_PARK_BOUNDS = [
   [40.7968, -73.9490],
 ];
 
+const OPENFREEMAP_POSITRON_STYLE = 'https://tiles.openfreemap.org/styles/positron';
+
 const FitBounds = ({ bounds }) => {
   const map = useMap();
   React.useEffect(() => {
     map.fitBounds(bounds, { padding: [20, 20], maxZoom: 15 });
   }, [map, bounds]);
+  return null;
+};
+
+const Basemap = () => {
+  const map = useMap();
+  React.useEffect(() => {
+    const layer = maplibreGL({ style: OPENFREEMAP_POSITRON_STYLE }).addTo(map);
+    return () => {
+      map.removeLayer(layer);
+    };
+  }, [map]);
   return null;
 };
 
@@ -76,10 +91,7 @@ const ParkMap = ({ animatedPath = [], affectedSegments = [] }) => {
           style={{ width: '100%', height: '100%' }}
         >
           <FitBounds bounds={CENTRAL_PARK_BOUNDS} />
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-            url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-          />
+          <Basemap />
 
           {affectedCoords.map((coords, i) => (
             <Polyline

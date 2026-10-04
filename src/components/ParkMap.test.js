@@ -3,10 +3,14 @@ import { render } from '@testing-library/react';
 
 const mockPolyline = jest.fn(() => null);
 const mockCircleMarker = jest.fn(() => null);
+// A plain function (not jest.fn) because react-scripts' jest config sets
+// resetMocks: true, which strips a jest.fn's implementation before each
+// test runs — a mock implementation here would return undefined.
+const mockMaplibreGL = jest.fn();
+const fakeMaplibreGLLayer = { addTo: () => fakeMaplibreGLLayer };
 
 jest.mock('react-leaflet', () => ({
   MapContainer: ({ children }) => <div>{children}</div>,
-  TileLayer: (props) => <div data-testid="tile-layer" data-url={props.url} />,
   Polyline: (props) => {
     mockPolyline(props);
     return null;
@@ -17,7 +21,14 @@ jest.mock('react-leaflet', () => ({
   },
   Tooltip: ({ children }) => <div data-testid="tooltip">{children}</div>,
   Marker: (props) => <div data-testid="marker" data-position={JSON.stringify(props.position)} />,
-  useMap: () => ({ fitBounds: jest.fn() }),
+  useMap: () => ({ fitBounds: jest.fn(), removeLayer: jest.fn() }),
+}));
+
+jest.mock('@maplibre/maplibre-gl-leaflet', () => ({
+  maplibreGL: (...args) => {
+    mockMaplibreGL(...args);
+    return fakeMaplibreGLLayer;
+  },
 }));
 
 jest.mock('../data/segmentGeometry.json', () => ({
@@ -30,12 +41,13 @@ import ParkMap from './ParkMap';
 beforeEach(() => {
   mockPolyline.mockClear();
   mockCircleMarker.mockClear();
+  mockMaplibreGL.mockClear();
 });
 
-test('renders the Carto Positron tile layer', () => {
-  const { getByTestId } = render(<ParkMap />);
-  expect(getByTestId('tile-layer').dataset.url).toBe(
-    'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
+test('renders the OpenFreeMap Positron basemap', () => {
+  render(<ParkMap />);
+  expect(mockMaplibreGL).toHaveBeenCalledWith(
+    expect.objectContaining({ style: 'https://tiles.openfreemap.org/styles/positron' })
   );
 });
 
