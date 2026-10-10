@@ -81,7 +81,9 @@ The build step (`react-scripts build && cp -r data build/ && node scripts/preren
 
 ## Environment
 
-`.env` with `OPENAI_API_KEY` is optional: `crawl:smart` gets most events from the NYC Open Data API, structured HTML parsing, and NYRR detail-page scraping, and only falls back to the LLM for NYCRUNS. Without the key, that one source is skipped rather than failing. Never commit it.
+`.env` with `OPENAI_API_KEY` is optional: `crawl:smart` gets most events from the NYC Open Data API, structured HTML parsing, and NYRR detail-page scraping. The key enables two LLM sources: NYCRUNS extraction, and an OpenAI web search (`scripts/lib/webSearch.js`, ~$0.15/run) for Central Park events in the next 6 weeks that the scrapers miss (e.g. triathlons). Web-search rows are tagged `SOURCE=websearch` and kept only if their link is on a site the search actually consulted. Without the key, both sources are skipped rather than failing. Never commit it.
+
+Dedup (`scripts/lib/events.js`) treats two rows on the same date as one event if they share an event-specific URL or have similar names; listing pages (e.g. `nyrr.org/fullraceyearindex`) never count as a URL match, and side events ("Rising NYRR at X") or different distances never merge.
 
 ## Agent Working Files
 

@@ -10,6 +10,7 @@ const puppeteer = require('puppeteer');
 const { isRouteImpacting } = require('./lib/routeImpact');
 const { deduplicateEvents } = require('./lib/events');
 const { transformFilmPermits } = require('./lib/filmPermits');
+const { buildWebSearchRequest, extractWebSearchEvents } = require('./lib/webSearch');
 
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -22,6 +23,8 @@ const urlsToScrape = [
 ];
 
 const NYC_OPEN_DATA_API = 'https://data.cityofnewyork.us/resource/8end-qv57.json';
+const WEB_SEARCH_MODEL = 'gpt-6-luna';
+const WEB_SEARCH_WINDOW_DAYS = 42;
 
 const outputPath = path.join(__dirname, '../data/events.csv');
 
@@ -601,6 +604,35 @@ async function extractEventsWithLLM(htmlContent, sourceUrl) {
   }
 }
 
+// The installed openai SDK predates the Responses API, so call it directly.
+async function fetchWebSearchEvents() {
+  if (!process.env.OPENAI_API_KEY) {
+    console.log('OpenAI API key not configured, skipping web search');
+    return [];
+  }
+
+  const options = { today: new Date().toISOString().slice(0, 10), windowDays: WEB_SEARCH_WINDOW_DAYS };
+  try {
+    const response = await axios.post(
+      'https://api.openai.com/v1/responses',
+      buildWebSearchRequest({ ...options, model: WEB_SEARCH_MODEL }),
+      {
+        headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
+        timeout: 300000
+      }
+    );
+
+    const searches = (response.data.output || []).filter(item => item.type === 'web_search_call').length;
+    const usage = response.data.usage || {};
+    console.log(`Web search: ${searches} search calls, ${usage.input_tokens} input / ${usage.output_tokens} output tokens`);
+
+    return extractWebSearchEvents(response.data, options);
+  } catch (error) {
+    console.error('Error running OpenAI web search:', error.response?.data?.error?.message || error.message);
+    return [];
+  }
+}
+
 function filterEvents(events, sourceUrl) {
   return events.filter(event => {
     const location = (event.location || '').toLowerCase();
@@ -670,6 +702,11 @@ async function main() {
 
     allEvents = [...allEvents, ...filteredEvents.map(e => ({ ...e, source: 'nycruns' }))];
   }
+
+  console.log('\n--- Web Search (OpenAI) ---');
+  const webSearchEvents = await fetchWebSearchEvents();
+  console.log(`Got ${webSearchEvents.length} verified events from web search`);
+  allEvents = [...allEvents, ...webSearchEvents];
 
   const impactingEvents = allEvents.filter(isRouteImpacting);
   console.log(`Route-impacting events: ${impactingEvents.length} (of ${allEvents.length} crawled)`);
