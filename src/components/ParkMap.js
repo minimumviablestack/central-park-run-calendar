@@ -3,10 +3,16 @@ import { Box, Paper, useTheme } from '@mui/material';
 import { MapContainer, Polyline, CircleMarker, Tooltip, Marker, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { maplibreGL } from '@maplibre/maplibre-gl-leaflet';
+import { setWorkerUrl } from 'maplibre-gl';
 import 'leaflet/dist/leaflet.css';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import segmentGeometry from '../data/segmentGeometry.json';
 import { getMileMarkers, getDirectionArrows } from '../utils/geoMath';
+
+// maplibre-gl v6 locates its worker via import.meta.url, which webpack bakes in
+// as a build-machine file:// path. Serve the worker ourselves (copied into
+// public/ by `npm run copy:maplibre-worker`) and point maplibre at it.
+setWorkerUrl(`${process.env.PUBLIC_URL}/maplibre/maplibre-gl-worker.mjs`);
 
 const CENTRAL_PARK_BOUNDS = [
   [40.7649, -73.9810],

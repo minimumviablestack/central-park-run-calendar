@@ -3,10 +3,13 @@
   "version": "1.0.0",
   "description": "A simple web application that shows park events to help runners plan their routes and avoid event crowds.",
   "scripts": {
+    "copy:maplibre-worker": "mkdir -p public/maplibre && cp node_modules/maplibre-gl/dist/maplibre-gl-worker.mjs node_modules/maplibre-gl/dist/maplibre-gl-shared.mjs public/maplibre/",
+    "prestart": "npm run copy:maplibre-worker",
     "start": "react-scripts start",
     "test": "react-scripts test --watchAll=false",
     "test:scripts": "node --test 'scripts/lib/**/*.test.js'",
     "crawl:smart": "node scripts/crawlEventsSmart.js",
+    "prebuild": "npm run copy:maplibre-worker",
     "build": "CI=false react-scripts build && cp -r data build/ && node scripts/prerender.js",
     "deploy": "gh-pages -d build"
   },

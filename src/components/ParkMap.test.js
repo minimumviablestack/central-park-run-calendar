@@ -31,17 +31,34 @@ jest.mock('@maplibre/maplibre-gl-leaflet', () => ({
   },
 }));
 
+// setWorkerUrl runs when ParkMap is imported — before this file's consts are
+// initialized and before resetMocks — so record calls on the mock module itself.
+// Virtual because maplibre-gl v6 is ESM-only (no "main"), which jest 27 can't resolve.
+jest.mock(
+  'maplibre-gl',
+  () => {
+    const workerUrls = [];
+    return { setWorkerUrl: (url) => workerUrls.push(url), workerUrls };
+  },
+  { virtual: true }
+);
+
 jest.mock('../data/segmentGeometry.json', () => ({
   drive_south: [[40.768, -73.9765], [40.778, -73.967]],
   reservoir: [[40.7795, -73.962], [40.7845, -73.958], [40.7795, -73.962]],
 }));
 
 import ParkMap from './ParkMap';
+import { workerUrls } from 'maplibre-gl';
 
 beforeEach(() => {
   mockPolyline.mockClear();
   mockCircleMarker.mockClear();
   mockMaplibreGL.mockClear();
+});
+
+test('points maplibre at the self-hosted worker copied into public/', () => {
+  expect(workerUrls).toEqual(['/maplibre/maplibre-gl-worker.mjs']);
 });
 
 test('renders the OpenFreeMap Positron basemap', () => {

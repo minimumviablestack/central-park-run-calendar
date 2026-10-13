@@ -27,3 +27,4 @@ node_modules/
 dist/
 public/data/
 .claude/tmp/
+public/maplibre/
