@@ -33,6 +33,7 @@ import HeroStatus from './HeroStatus';
 import RoutePlanner from './RoutePlanner';
 import BestWindowCard from './BestWindowCard';
 import WeekStrip from './WeekStrip';
+import RaceWeekCard from './RaceWeekCard';
 import { downloadICS, getGoogleCalendarUrl } from '../utils/calendarExport';
 import { injectEventsStructuredData } from '../utils/structuredData';
 
@@ -172,6 +173,10 @@ function EventList() {
 
         <Grid item xs={12}>
           <HeroStatus todayEvents={todayEvents} weather={weather} />
+        </Grid>
+
+        <Grid item xs={12} sx={{ '&:empty': { display: 'none' } }}>
+          <RaceWeekCard />
         </Grid>
 
         <Grid item xs={12}>
