@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert');
-const { normalizeUrl, isGenericUrl, namesMatch, deduplicateEvents } = require('./events');
+const { normalizeUrl, isGenericUrl, namesMatch, deduplicateEvents, dropPermitSetupDays } = require('./events');
 
 test('normalizeUrl ignores scheme, www, trailing slash, case, and tracking params', () => {
   assert.equal(
@@ -133,4 +133,34 @@ test('deduplicateEvents merges matching names whose specific pages are on differ
     { name: 'New York Mini 10K', date: '2026-06-13', url: 'https://nycruns.com/race/mini-10k' },
   ]);
   assert.equal(result.length, 1);
+});
+
+const MARATHON = {
+  name: '2026 TCS New York City Marathon', date: '2026-11-01', startTime: '08:00 AM', endTime: '',
+  url: 'https://events.nyrr.org/tcs-new-york-city-marathon', source: 'manual',
+};
+const permitDay = (date) => ({
+  name: '2026 TCS NYC Marathon - Manhattan - Central Park', date, startTime: '12:00 AM', endTime: '11:59 PM',
+  url: 'https://www.nycgovparks.org/parks/central-park/events', source: 'nyc-open-data',
+});
+
+test('dropPermitSetupDays drops all-day Parks permit days around a known race', () => {
+  const result = dropPermitSetupDays([MARATHON, permitDay('2026-10-19'), permitDay('2026-10-31'), permitDay('2026-11-06')]);
+  assert.deepEqual(result, [MARATHON]);
+});
+
+test('dropPermitSetupDays keeps the permit row on race day for dedup', () => {
+  const raceDay = permitDay('2026-11-01');
+  assert.deepEqual(dropPermitSetupDays([MARATHON, raceDay]), [MARATHON, raceDay]);
+});
+
+test('dropPermitSetupDays keeps permits with no matching race nearby', () => {
+  const festival = { ...permitDay('2026-07-04'), name: 'Summer Festival - Central Park' };
+  const lastYear = permitDay('2025-10-25');
+  assert.equal(dropPermitSetupDays([MARATHON, festival, lastYear]).length, 3);
+});
+
+test('dropPermitSetupDays keeps Parks permits with real start times', () => {
+  const timed = { ...permitDay('2026-10-31'), startTime: '7:00 AM', endTime: '9:00 AM' };
+  assert.equal(dropPermitSetupDays([MARATHON, timed]).length, 2);
 });

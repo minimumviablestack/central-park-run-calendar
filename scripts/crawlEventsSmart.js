@@ -8,7 +8,7 @@ const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 require('dotenv').config();
 const puppeteer = require('puppeteer');
 const { isRouteImpacting } = require('./lib/routeImpact');
-const { deduplicateEvents } = require('./lib/events');
+const { deduplicateEvents, dropPermitSetupDays } = require('./lib/events');
 const { transformFilmPermits } = require('./lib/filmPermits');
 const { buildWebSearchRequest, extractWebSearchEvents } = require('./lib/webSearch');
 
@@ -714,6 +714,9 @@ async function main() {
   allEvents = [...existingEvents, ...impactingEvents];
   console.log(`\nTotal events after merging: ${allEvents.length}`);
   
+  allEvents = dropPermitSetupDays(allEvents);
+  console.log(`After dropping permit setup/teardown days: ${allEvents.length}`);
+
   const uniqueEvents = deduplicateEvents(allEvents);
   console.log(`After deduplication: ${uniqueEvents.length} unique events`);
   

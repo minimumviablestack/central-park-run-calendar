@@ -111,4 +111,31 @@ function deduplicateEvents(events) {
   return groups.map((members) => members.reduce((best, event) => (isBetterEntry(event, best) ? event : best)));
 }
 
-module.exports = { normalizeUrl, isGenericUrl, namesMatch, deduplicateEvents };
+// NYC Parks lists a big race's permit as one all-day row per day of stage
+// setup and teardown (the marathon's runs ~3 weeks). The park stays runnable
+// on those days, so only the race day itself is worth showing.
+const PERMIT_SOURCE = 'nyc-open-data';
+const PERMIT_WINDOW_DAYS = 21;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+function isAllDayPermit(event) {
+  return event.source === PERMIT_SOURCE
+    && /^12:00\s*AM$/i.test((event.startTime || '').trim())
+    && /^11:59\s*PM$/i.test((event.endTime || '').trim());
+}
+
+function daysApart(a, b) {
+  return Math.abs(Date.parse(a) - Date.parse(b)) / DAY_MS;
+}
+
+function dropPermitSetupDays(events) {
+  const races = events.filter((event) => event.source !== PERMIT_SOURCE);
+  return events.filter((event) => {
+    if (!isAllDayPermit(event)) return true;
+    const nearbyRaces = races.filter((race) => namesMatch(race.name, event.name)
+      && daysApart(race.date, event.date) <= PERMIT_WINDOW_DAYS);
+    return nearbyRaces.length === 0 || nearbyRaces.some((race) => race.date === event.date);
+  });
+}
+
+module.exports = { normalizeUrl, isGenericUrl, namesMatch, deduplicateEvents, dropPermitSetupDays };
